@@ -1,0 +1,418 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Truck Geeks</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/TruckServices.styles.css" asp-append-version="true" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <title>Index - Logis Bootstrap Template</title>
+    <meta name="description" content="">
+    <meta name="keywords" content="">
+
+    <!-- Favicons -->
+    <link href="assets/img/truck-image.png" rel="icon">
+    <link href="assets/img/apple-touch-icon.png" rel="apple-touch-icon">
+
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com" rel="preconnect">
+    <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
+
+    <!-- Vendor CSS Files -->
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <link href="~/assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href="~/assets/vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
+    <link href="~/assets/vendor/aos/aos.css" rel="stylesheet">
+    <link href="~/assets/vendor/fontawesome-free/css/all.min.css" rel="stylesheet">
+    <link href="~/assets/vendor/glightbox/css/glightbox.min.css" rel="stylesheet">
+    <link href="~/assets/vendor/swiper/swiper-bundle.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+
+    <!-- Tailwind CSS CDN -->
+    <link href="https://cdn.tailwindcss.com" rel="stylesheet" />
+
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+
+    <!-- Main CSS File -->
+    <link href="~/assets/css/main.css" rel="stylesheet">
+    <style>
+        /* Header */
+        .header {
+            background: #111827;
+            padding: 12px 0;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+            z-index: 1000;
+        }
+
+        .sitename {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        /* Desktop links */
+        .action-links {
+            display: flex;
+        }
+
+        .header-link {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #fff;
+            text-decoration: underline;
+            padding: 6px 10px;
+            border-radius: 6px;
+            transition: all 0.2s ease-in-out;
+        }
+
+            .header-link:hover {
+                background-color: rgba(255, 255, 255, 0.15);
+                color: #f3f4f6;
+            }
+
+        /* Mobile hamburger */
+        .menu-toggle {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 1.8rem;
+            color: #fff;
+            cursor: pointer;
+        }
+
+        /* Fullscreen modal menu */
+        .mobile-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(17,24,39,0.95);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            gap: 1.2rem;
+        }
+
+            .mobile-modal.show {
+                display: flex;
+                animation: fadeIn 0.3s ease-in-out;
+            }   
+
+                .mobile-modal a:hover,
+                .mobile-modal button:hover {
+                    background: rgba(255,255,255,0.2);
+                }
+
+        .close-btn {
+            position: absolute;
+            top: 20px;
+            right: 25px;
+            font-size: 2rem;
+            color: #fff;
+            background: none;
+            border: none;
+        }
+
+        @@keyframes fadeIn {
+            from
+
+        {
+            opacity: 0;
+        }
+
+        to {
+            opacity: 1;
+        }
+
+        }
+
+        /* Hide desktop menu on small screens */
+        @@media (max-width: 768px) {
+            .action-links
+
+        {
+            display: none !important; /* force hide */
+        }
+
+        .menu-toggle {
+            display: block; /* show hamburger */
+        }
+
+        }
+
+        /* Mobile modal (overlay background) */
+        .mobile-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(17, 24, 39, 0.6); /* semi-dark overlay */
+            z-index: 2000;
+        }
+
+        /* Side drawer */
+        .mobile-menu {
+            position: absolute;
+            top: 0;
+            right: -80%; /* hidden by default */
+            width: 70%;
+            height: 100%;
+            background: #111827;
+            display: flex;
+            flex-direction: column;
+            padding: 2rem 1.5rem;
+            gap: 1.2rem;
+            transition: right 0.3s ease-in-out;
+            box-shadow: -2px 0 12px rgba(0,0,0,0.3);
+            border-radius: 12px 0 0 12px;
+        }
+
+        /* Show modal + slide drawer */
+        .mobile-modal.show {
+            display: block;
+        }
+
+            .mobile-modal.show .mobile-menu {
+                right: 0;
+            }
+
+        /* Links inside drawer */
+        .mobile-link {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #fff;
+            padding: 12px 16px;
+            border-radius: 8px;
+            background: rgba(255,255,255,0.08);
+            text-decoration: none;
+            transition: all 0.2s ease-in-out;
+        }
+
+            .mobile-link:hover {
+                background: rgba(255,255,255,0.2);
+            }
+
+        /* Close button */
+        .close-btn {
+            align-self: flex-end;
+            font-size: 1.8rem;
+            color: #fff;
+            background: none;
+            border: none;
+            cursor: pointer;
+            margin-bottom: 1.5rem;
+        }
+
+        /* Only on mobile */
+        @@media (max-width: 768px) {
+            .action-links
+
+        {
+            display: none !important;
+        }
+
+        .menu-toggle {
+            display: block;
+        }
+
+        }
+
+        /* Mobile links (clean, not buttons) */
+        .mobile-link {
+            display: block;
+            width: 100%;
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #f9fafb;
+            padding: 14px 6px;
+            text-align: left;
+            text-decoration: none;
+            border-bottom: 1px solid rgba(255,255,255,0.12);
+            transition: color 0.25s ease, transform 0.25s ease;
+        }
+
+            /* Hover/tap effect */
+            .mobile-link:hover {
+                color: #60a5fa; /* blue accent */
+                transform: translateX(6px);
+                text-decoration: underline;
+            }
+
+            /* Active press */
+            .mobile-link:active {
+                color: #93c5fd;
+                transform: translateX(3px);
+            }
+
+        .logo-image {
+            height: 70px !important; /* increase image size */
+            width: auto !important; /* keep aspect ratio */
+        }
+
+        .logo .sitename {
+            font-size: 1.5rem; /* keep text same size */
+            line-height: 1;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+        }
+
+    </style>
+
+</head>
+<body>
+    <header id="header" class="header d-flex align-items-center fixed-top">
+        <div class="container-fluid container-xl position-relative d-flex align-items-center justify-content-between">
+
+            <a asp-area="" asp-controller="Home" asp-action="Index"
+               class="logo d-flex align-items-center text-decoration-none">
+                <img src="assets/img/logo.png" class="img-fluid me-2 logo-image" alt="">
+                <h1 class="sitename mb-0">Truck Geeks</h1>
+            </a>
+
+            <!-- Desktop Navigation -->
+            <nav class="action-links d-flex flex-wrap align-items-center gap-3">
+                <a asp-controller="Home" asp-action="ContactUs" class="header-link">Contact Us to Get Listed</a>
+
+                @if (User.Identity?.IsAuthenticated ?? false)
+                {
+                    <a asp-controller="Customers" asp-action="Index" class="header-link">Customer Management</a>
+                    <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="header-link border-0 bg-transparent">Logout</button>
+                    </form>
+                }
+                else
+                {
+                    <a asp-controller="Account" asp-action="Login" class="header-link">Login</a>
+                }
+            </nav>
+
+            <!-- Mobile Hamburger -->
+            <button class="menu-toggle" onclick="document.getElementById('mobileModal').classList.add('show')">
+                ☰
+            </button>
+        </div>
+    </header>
+
+    <!-- Mobile Modal Menu -->
+    <div id="mobileModal" class="mobile-modal">
+        <div class="mobile-menu">
+            <div class="m-2">
+            <button class="close-btn" onclick="document.getElementById('mobileModal').classList.remove('show')">✕</button>
+            </div>
+
+            <a asp-controller="Home" asp-action="ContactUs" class="mobile-link">Contact Us to Get Listed</a>
+
+            @if (User.Identity?.IsAuthenticated ?? false)
+            {
+                <a asp-controller="Customers" asp-action="Index" class="mobile-link">Customer Management</a>
+                <form asp-controller="Account" asp-action="Logout" method="post">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="mobile-link">Logout</button>
+                </form>
+            }
+            else
+            {
+                <a asp-controller="Account" asp-action="Login" class="mobile-link">Login</a>
+            }
+        </div>
+    </div>
+
+    <div>
+            @RenderBody()
+    </div>
+
+    <footer id="footer" class="footer dark-background">
+
+        <div class="container footer-top">
+            <div class="row gy-4">
+                <div class="col-lg-5 col-md-12 footer-about">
+                    <a href="index.html" class="logo d-flex align-items-center">
+                        <span class="sitename">Truck Geeks</span>
+                    </a>
+                    <p>
+                        Find trusted truck repair shops near you — fast, reliable, and verified.
+                        Explore services, compare ratings, and get your truck back on the road.
+                    </p>
+                </div>
+
+                <div class="col-lg-2 col-6 footer-links">
+                    <h4>Useful Links</h4>
+                    <ul>
+                        <li><a class="btn-getstarted" asp-area="" asp-controller="Home" asp-action="Index">Home</a></li>
+                        <li><a class="btn-getstarted" asp-area="" asp-controller="Home" asp-action="ContactUs">Contact Us</a></li>
+                    </ul>
+                </div>
+@* 
+                <div class="col-lg-2 col-6 footer-links">
+                    <h4>Our Services</h4>
+                    <ul>
+                        <li><a href="#">Web Design</a></li>
+                        <li><a href="#">Web Development</a></li>
+                        <li><a href="#">Product Management</a></li>
+                        <li><a href="#">Marketing</a></li>
+                        <li><a href="#">Graphic Design</a></li>
+                    </ul>
+                </div> *@
+
+                <div class="col-lg-3 col-md-12 footer-contact text-center text-md-start">
+                    <h4>Contact Us</h4>
+                    <p>A108 Adam Street</p>
+                    <p>New York, NY 535022</p>
+                    <p>United States</p>
+                    <p class="mt-4"><strong>Phone:</strong> <span>+1 5589 55488 55</span></p>
+                    <p><strong>Email:</strong> <span>info@example.com</span></p>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="container copyright text-center mt-4">
+            <p>© <span>Copyright</span> <strong class="px-1 sitename">Truck Geeks</strong> <span>All Rights Reserved</span></p>
+        </div>
+
+    </footer>
+
+    <!-- Scroll Top -->
+    <a href="#" id="scroll-top" class="scroll-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
+
+    <!-- Preloader -->
+    <div id="preloader"></div>
+
+   
+    <!-- Vendor JS Files -->
+    <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="~/assets/vendor/php-email-form/validate.js"></script>
+    <script src="~/assets/vendor/aos/aos.js"></script>
+    <script src="~/assets/vendor/purecounter/purecounter_vanilla.js"></script>
+    <script src="~/assets/vendor/glightbox/js/glightbox.min.js"></script>
+    <script src="~/assets/vendor/swiper/swiper-bundle.min.js"></script>
+
+    <!-- Main JS File -->
+    <script src="~/assets/js/main.js"></script>
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+
+    <!-- Select2 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+    <script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
+    <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
+
+
+
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>
