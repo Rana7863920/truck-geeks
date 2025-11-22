@@ -34,6 +34,10 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
         options.LogoutPath = "/Account/Logout";
     });
 
+builder.Configuration
+    .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+    .AddEnvironmentVariables();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
