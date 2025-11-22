@@ -1,0 +1,199 @@
+﻿@using TruckServices.Data
+@model IEnumerable<CustomersData>
+
+    <style>
+        .search-bar input {
+            max-width: 300px;
+        }
+
+        .table thead th {
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        .table-hover tbody tr:hover {
+            background-color: #f8f9fa;
+        }
+
+        .btn-group .btn {
+            margin-right: 5px;
+        }
+
+    .pagination .page-link {
+        border-radius: 30px;
+        padding: 0.5rem 1rem;
+        font-weight: 500;
+        transition: all 0.2s ease-in-out;
+    }
+
+        .pagination .page-link:hover {
+            background-color: #0d6efd;
+            color: #fff;
+        }
+
+    .pagination .disabled .page-link {
+        opacity: 0.6;
+        pointer-events: none;
+    }
+
+    .customer-img-rect {
+        width: 100px; /* wider rectangle */
+        height: 70px;
+        object-fit: cover; /* keeps proportions, crops nicely */
+        border: 2px solid #dee2e6;
+        border-radius: 8px; /* slightly rounded corners */
+    }
+
+    </style>
+
+
+<!-- Page Title Section Above -->
+<div class="page-title dark-background text-white" style="background-image: url(/assets/img/page-title-bg.jpg);">
+    <div class="container position-relative text-center py-5">
+        <h1 class="fw-bold">Customers Data</h1>
+        <p class="lead">Manage your customers efficiently</p>
+        <nav class="breadcrumbs">
+            <ol class="breadcrumb justify-content-center">
+                <li class="breadcrumb-item"><a href="index.html" class="text-white-50">Account</a></li>
+                <li class="breadcrumb-item active text-white">Customers Data</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<div class="container mt-5">
+
+    <!-- Search + Add -->
+    <div class="d-flex justify-content-between flex-wrap align-items-center mb-4">
+        <form asp-action="Index" method="get" class="d-flex search-bar">
+            <input type="text" name="search" value="@ViewBag.Search"
+                   class="form-control form-control-lg me-2 shadow-sm" placeholder="🔍 Search customers..." />
+            <button type="submit" class="btn btn-primary btn-lg shadow-sm">
+                Search
+            </button>
+        </form>
+
+        <a asp-action="Create" class="btn btn-success btn-lg shadow-sm" id="btnCreate">
+            <i class="bi bi-plus-circle me-1"></i> Add New
+        </a>
+    </div>
+
+    <!-- Table -->
+    <div class="card shadow-sm rounded-3 border-0">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover table-striped align-middle mb-0">
+                    <thead class="table-primary">
+                        <tr>
+                            <th>Company</th>
+                            <th>City</th>
+                            <th>Email</th>
+                            <th>Image</th>
+                            <th style="width:150px;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (!Model.Any())
+                        {
+                            <tr>
+                                <td colspan="5" class="text-center text-muted py-4">No records found</td>
+                            </tr>
+                        }
+                        else
+                        {
+                            foreach (var item in Model)
+                            {
+                                <tr>
+                                    <td class="fw-semibold">@item.CompanyName</td>
+                                    <td>@item.City</td>
+                                    <td>@item.Email</td>
+                                    <td>
+                                        @if (item.ImageUrl != null)
+                                        {
+                                            <img src="@Url.Action("GetImage", "Customers", new { id = item.Id })"
+                                                 class="customer-img-rect img-thumbnail" />
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-light text-secondary">No Image</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        <div class="btn-group">
+                                            <button class="btn btn-sm btn-outline-primary editBtn" data-id="@item.Id" title="Edit">
+                                                <i class="bi bi-pencil"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-danger deleteBtn" data-id="@item.Id" title="Delete">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pagination -->
+    <nav class="mt-4">
+        <ul class="pagination justify-content-center">
+            <li class="page-item @(ViewBag.CurrentPage == 1 ? "disabled" : "")">
+                <a class="page-link" href="@Url.Action("Index", new { page = ViewBag.CurrentPage - 1, search = ViewBag.Search })">
+                    <i class="bi bi-chevron-left"></i> Previous
+                </a>
+            </li>
+
+            <li class="page-item @(ViewBag.CurrentPage == ViewBag.TotalPages ? "disabled" : "")">
+                <a class="page-link" href="@Url.Action("Index", new { page = ViewBag.CurrentPage + 1, search = ViewBag.Search })">
+                    Next <i class="bi bi-chevron-right"></i>
+                </a>
+            </li>
+        </ul>
+    </nav>
+
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="crudModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content" id="modalContent">
+            <!-- AJAX content will load here -->
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            // Create button
+            $('#btnCreate').click(function (e) {
+                e.preventDefault();
+                $('#crudModal').modal('show');
+                $.get('/Customers/Create', function (data) {
+                    $('#modalContent').html(data);
+                });
+            });
+
+            // Edit button
+            $('.editBtn').click(function () {
+                var id = $(this).data('id');
+                $('#crudModal').modal('show');
+                $.get('/Customers/Edit/' + id, function (data) {
+                    $('#modalContent').html(data);
+                });
+            });
+
+            // Delete button
+            $('.deleteBtn').click(function () {
+                var id = $(this).data('id');
+                $('#crudModal').modal('show');
+                $.get('/Customers/Delete/' + id, function (data) {
+                    $('#modalContent').html(data);
+                });
+            });
+        });
+    </script>
+}

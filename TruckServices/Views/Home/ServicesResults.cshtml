@@ -1,0 +1,634 @@
+﻿@model ServiceResultsViewModel
+
+@{
+    ViewData["Title"] = "Service Results";
+}
+
+<style>
+    .results-container {
+        margin-top: 3rem;
+        max-width: 1140px;
+        margin-left: auto;
+        margin-right: auto;
+        padding: 20px;
+        background-color: #f1f5f9;
+        font-family: Arial, sans-serif;
+    }
+
+
+        .results-container h2 {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 30px;
+        }
+
+    .provider-card {
+        background-color: #fff;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        margin-bottom: 30px;
+        padding: 24px;
+    }
+
+    .provider-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+    }
+
+        .provider-header h3 {
+            font-size: 20px;
+            font-weight: bold;
+            margin: 0 0 10px 0;
+        }
+
+    .contact-button {
+        border: 1px solid #2563eb;
+        color: #2563eb;
+        font-weight: 600;
+        border-radius: 6px;
+        padding: 10px 20px;
+        background-color: transparent;
+        cursor: pointer;
+        transition: background-color 0.2s;
+    }
+
+        .contact-button:hover {
+            background-color: #e8f0fe;
+        }
+
+    .provider-body {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+    }
+
+    .provider-image {
+        flex: 0 0 30%;
+        max-width: 300px;
+    }
+
+        .provider-image img {
+            width: 100%;
+            height: auto;
+            border-radius: 6px;
+        }
+
+    .provider-info {
+        flex: 1;
+        min-width: 250px;
+    }
+
+    .info-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 15px;
+        font-size: 14px;
+        margin-bottom: 16px;
+        color: #555;
+    }
+
+        .info-tags span i {
+            margin-right: 5px;
+        }
+
+    .open {
+        color: green;
+        font-weight: bold;
+    }
+
+    .closed {
+        color: red;
+        font-weight: bold;
+    }
+
+    ul.service-list {
+        padding-left: 20px;
+        margin: 0;
+        list-style-type: disc;
+        font-size: 14px;
+        color: #111;
+    }
+
+    .pagination-wrapper {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 16px;
+        margin-top: 20px;
+    }
+
+    .btn-pagination {
+        background-color: #2563eb;
+        color: #fff;
+        border: none;
+        padding: 8px 18px;
+        border-radius: 6px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background-color 0.2s;
+    }
+
+        .btn-pagination:hover {
+            background-color: #1743a0;
+        }
+
+    .page-count {
+        font-size: 14px;
+        color: #444;
+        font-weight: 500;
+    }
+
+    /* Form */
+
+    .custom-form-wrapper {
+        background: #fff;
+        border: 1px solid #dee2e6;
+        border-radius: 12px;
+        padding: 24px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        margin: 0 auto;
+    }
+
+    @@media(min-width: 1200px) {
+        .service {
+            margin-left: 2rem;
+        }
+    }
+
+    .form-label {
+        font-weight: 500;
+        color: #5d6d7c;
+        font-size: 0.875rem;
+        margin-bottom: 4px;
+    }
+
+    .form-select {
+        border-radius: 10px;
+        padding: 0.75rem 1rem;
+        min-height: 48px;
+        font-size: 0.95rem;
+        width: 100%;
+    }
+
+    .form-icon {
+        display: flex;
+        align-items: center;
+        padding: 0 12px;
+        color: #5d6d7c;
+        background-color: #f1f3f5;
+        border-top-left-radius: 10px;
+        border-bottom-left-radius: 10px;
+    }
+
+    .input-group {
+        position: relative;
+        display: flex;
+        flex-wrap: nowrap;
+        align-items: stretch;
+        flex-direction: row;
+        width: 100%;
+    }
+
+
+
+    .search-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 48px;
+        width: 100%;
+        border-radius: 10px;
+        background-color: #0d6efd;
+        border: none;
+    }
+
+        .search-btn svg {
+            stroke: #fff;
+            width: 22px;
+            height: 22px;
+        }
+
+        .search-btn:hover {
+            background-color: #0b5ed7;
+        }
+
+    .form-controls.row.gx-4.gy-3.align-items-end {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: nowrap;
+    }
+
+    @@media (min-width: 768px) {
+        .search-btn {
+            width: 100%;
+        }
+
+        .form-controls.row.gx-4.gy-3.align-items-end {
+            flex-wrap: wrap;
+        }
+    }
+
+    /* Match Select2 appearance to Bootstrap form-select */
+    .select2-container .select2-selection--single {
+        height: 48px !important;
+        padding: 0.75rem 1rem;
+        border-radius: 10px;
+        border: 1px solid #ced4da;
+        font-size: 0.95rem;
+        display: flex;
+        align-items: center;
+    }
+
+    .select2-container--default .select2-selection--single .select2-selection__rendered {
+        color: #495057;
+        line-height: 1.5;
+    }
+
+    .select2-container--default .select2-selection--single .select2-selection__arrow {
+        height: 48px;
+        right: 10px;
+    }
+
+
+    .input-group .form-icon {
+        background-color: #e9ecef;
+        border: 1px solid #ced4da;
+        border-right: 0;
+        padding: 0.375rem 0.75rem;
+        border-top-left-radius: 0.375rem;
+        border-bottom-left-radius: 0.375rem;
+        display: flex;
+        align-items: center;
+    }
+
+    .input-group .form-select {
+        border-top-left-radius: 0;
+        border-bottom-left-radius: 0;
+    }
+
+    .select2-container--default .select2-results__option {
+        color: #000 !important; /* black text */
+        background-color: #fff !important; /* white background */
+    }
+
+    .select2-container--default .select2-results__option--highlighted {
+        background-color: #007bff !important; /* bootstrap primary */
+        color: #fff !important;
+    }
+
+    /* Default for mobile */
+    .search-icon {
+        width: 20px;
+        height: 20px;
+    }
+
+    /* On medium and larger screens */
+    @@media (min-width: 768px) {
+        .search-icon {
+            width: 24px;
+            height: 24px;
+        }
+    }
+
+    /* On extra large screens */
+    @@media (min-width: 1200px) {
+        .search-icon {
+            width: 28px;
+            height: 28px;
+        }
+    }
+</style>
+
+<!-- Contact Modal -->
+<div class="modal fade" id="contactModal" tabindex="-1" aria-labelledby="contactModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="contactModalLabel">Contact Info</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p id="contactInfo">Loading...</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Page Title Section Above -->
+<div class="page-title dark-background" data-aos="fade" style="background-image: url(assets/img/page-title-bg.jpg);">
+    <div class="container position-relative">
+        <h1>Service Providers Results</h1>
+        <p>Find the best service providers near you with detailed info and contact options.</p>
+        <nav class="breadcrumbs">
+            <ol>
+                <li><a href="index.html">Home</a></li>
+                <li class="current">Service Providers</li>
+            </ol>
+        </nav>
+    </div>
+</div><!-- End Page Title -->
+<!-- ✅ Search Form -->
+<div class="container-fluid px-3 mt-4">
+    <form asp-controller="Home" asp-action="ServicesResults" method="post"
+          class="custom-form-wrapper mb-4 shadow-sm rounded-3 p-4 bg-white"
+          data-aos="fade-up" data-aos-delay="200">
+        @Html.AntiForgeryToken()
+
+        <div class="row g-3 align-items-end">
+
+            <!-- Location -->
+            <div class="col-12 col-md-5">
+                <label for="location" class="form-label fw-semibold">Location</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-light">
+                        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 16 16">
+                            <path d="M14 6.667C14 11.334 8 15.334 8 15.334S2 11.334 2 6.667a6 6 0 0112 0z" />
+                            <circle cx="8" cy="6.667" r="2" />
+                        </svg>
+                    </span>
+
+                    <!-- FIX: make it a <select> -->
+                    <select id="location" name="location" class="form-select" style="width: 100%;" required>
+                        <option value="">Search for a city</option>
+
+
+                        @* Preselect the existing city from the model *@
+                        @if (!string.IsNullOrEmpty(Model.Location))
+                        {
+                            <option value="@Model.Location" selected>@Model.Location</option>
+                        }
+
+                    </select>
+                </div>
+            </div>
+
+            <!-- Service -->
+            <div class="col-12 col-md-5">
+                <label for="service" class="form-label fw-semibold">Service</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-light">
+                        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                            <path d="M14.3 6.5L16 8.2a1 1 0 001.4 0l4-4a6 6 0 01-1.1 7.8l-6.9 6.9a6 6 0 01-8.5 0 6 6 0 010-8.5l6.9-6.9a6 6 0 017.8-1.1l-4 4a1 1 0 000 1.4z" />
+                        </svg>
+                    </span>
+                    <select class="form-select" id="service" name="service" required>
+                        <option value="">Select the service</option>
+
+                        @if (Model.Service == "repair")
+                        {
+                            <option value="repair" selected>Truck Repair</option>
+                        }
+                        else
+                        {
+                            <option value="repair">Truck Repair</option>
+                        }
+
+                        @if (Model.Service == "trailer")
+                        {
+                            <option value="trailer" selected>Trailer Repair</option>
+                        }
+                        else
+                        {
+                            <option value="trailer">Trailer Repair</option>
+                        }
+
+                        @if (Model.Service == "tire")
+                        {
+                            <option value="tire" selected>Tire Repair</option>
+                        }
+                        else
+                        {
+                            <option value="tire">Tire Repair</option>
+                        }
+
+                        @if (Model.Service == "towing")
+                        {
+                            <option value="towing" selected>Towing</option>
+                        }
+                        else
+                        {
+                            <option value="towing">Towing</option>
+                        }
+
+                        @if (Model.Service == "maintenance")
+                        {
+                            <option value="maintenance" selected>Maintenance</option>
+                        }
+                        else
+                        {
+                            <option value="maintenance">Maintenance</option>
+                        }
+
+                        @if (Model.Service == "reefer")
+                        {
+                            <option value="reefer" selected>Reefer</option>
+                        }
+                        else
+                        {
+                            <option value="reefer">Reefer</option>
+                        }
+
+                        @if (Model.Service == "networks")
+                        {
+                            <option value="networks" selected>Networks</option>
+                        }
+                        else
+                        {
+                            <option value="networks">Networks</option>
+                        }
+                    </select>
+                </div>
+            </div>
+
+            <!-- Search Button -->
+            <div class="col-12 col-md-2">
+                <label class="form-label invisible">Search</label>
+                <button type="submit" class="btn btn-primary w-100 d-flex align-items-center justify-content-center gap-2"
+                        style="padding-top:11px; padding-bottom:11px;">
+                    Search
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+<!-- Existing Results Container -->
+<div class="results-container">
+    <h2>Service Providers (@Model.TotalCount)</h2>
+
+    @foreach (var provider in Model.Providers)
+    {
+        <div class="provider-card">
+            <div class="provider-header">
+                <h3>@provider.CompanyName</h3>
+                <button type="button" class="contact-button"
+                        data-bs-toggle="modal"
+                        data-bs-target="#contactModal"
+                        data-company="@provider.CompanyName"
+                        data-number="@provider.MobileNumber"
+                        data-second="@provider.SecondMobileNumber">
+                    Contact
+                </button>
+            </div>
+            <div class="provider-body">
+                <div class="provider-image">
+                    <img src="@provider.ImageBase64" alt="@provider.CompanyName logo" />
+                </div>
+                <div class="provider-info">
+                    <div class="info-tags">
+                        <span><i class="fas fa-map-marker-alt"></i>@provider.StreetAddress</span>
+                        <span>
+                            <i class="far fa-clock"></i>Hours:
+                            <span class="@(provider.Status == "Open" ? "open" : "closed")">(@provider.Status)</span>
+                        </span>
+                        <span>
+                            <i class="fas fa-external-link-alt"></i>
+                            <a href="https://www.google.com/search?q=@Uri.EscapeDataString(provider.CompanyName + " " + provider.StreetAddress)"
+                               target="_blank"
+                               rel="noopener noreferrer">
+                                Website
+                            </a>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- Pagination -->
+    <div class="pagination-wrapper">
+        @if (Model.CurrentPage > 1)
+        {
+            <form asp-action="ServicesResults" method="post" class="d-inline">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="location" value="@Model.Location" />
+                <input type="hidden" name="service" value="@Model.Service" />
+                <input type="hidden" name="page" value="@(Model.CurrentPage - 1)" />
+                <button type="submit" class="btn-pagination">« Prev</button>
+            </form>
+        }
+
+        <span class="page-count">Page @Model.CurrentPage of @Model.TotalPages</span>
+
+        @if (Model.CurrentPage < Model.TotalPages)
+        {
+            <form asp-action="ServicesResults" method="post" class="d-inline">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="location" value="@Model.Location" />
+                <input type="hidden" name="service" value="@Model.Service" />
+                <input type="hidden" name="page" value="@(Model.CurrentPage + 1)" />
+                <button type="submit" class="btn-pagination">Next »</button>
+            </form>
+        }
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            console.log("✅ Service Results page script loaded.");
+
+            // Initialize Select2 on the location dropdown
+            $('#location').select2({
+                placeholder: "Search for a city",
+                width: '100%',
+                minimumInputLength: 0,
+                ajax: {
+                    url: '/Home/SearchCities',
+                    dataType: 'json',
+                    delay: 250,
+                    data: function (params) {
+                        return { term: params.term || "" };
+                    },
+                    processResults: function (data) {
+                        var results = [{
+                            id: "use-my-location",
+                            text: "📍 Use My Location"
+                        }];
+
+                        data.forEach(function (cityObj) {
+                            let label = `${cityObj.city}${cityObj.state ? ', ' + cityObj.state : ''}, ${cityObj.country}`;
+                            results.push({ id: label, text: label });
+                        });
+
+                        return { results: results };
+                    }
+                }
+            });
+
+            // Handle “Use My Location”
+            $('#location').on('select2:select', function (e) {
+                if (e.params.data.id === "use-my-location") {
+                    if (navigator.geolocation) {
+                        navigator.geolocation.getCurrentPosition(function (position) {
+                            const lat = position.coords.latitude;
+                            const lon = position.coords.longitude;
+                            alert(`Location detected: (${lat}, ${lon})`);
+                        }, function () {
+                            alert("Could not detect location.");
+                        });
+                    } else {
+                        alert("Geolocation not supported.");
+                    }
+                }
+            });
+
+            // Contact modal logic
+            const contactModal = document.getElementById('contactModal');
+            contactModal.addEventListener('show.bs.modal', function (event) {
+                const button = event.relatedTarget;
+                const company = button.getAttribute('data-company');
+                const number = button.getAttribute('data-number');
+                const second = button.getAttribute('data-second');
+
+                let infoText = "";
+                if (number || second) {
+                    infoText = `<strong>${company}</strong><br>`;
+                    if (number) infoText += `Primary: <a href="tel:${number}">${number}</a><br>`;
+                    if (second) infoText += `Secondary: <a href="tel:${second}">${second}</a>`;
+                } else {
+                    infoText = "Sorry, no contact info available.";
+                }
+
+                document.getElementById('contactInfo').innerHTML = infoText;
+            });
+        });
+    </script>
+
+
+    <script>
+        const contactModal = document.getElementById('contactModal');
+        contactModal.addEventListener('show.bs.modal', function (event) {
+            const button = event.relatedTarget;
+            const company = button.getAttribute('data-company');
+            const number = button.getAttribute('data-number');
+            const second = button.getAttribute('data-second');
+
+            let infoText = "";
+            if (number || second) {
+                infoText = `<strong>${company}</strong><br>`;
+                if (number) infoText += `Primary: <a href="tel:${number}">${number}</a><br>`;
+                if (second) infoText += `Secondary: <a href="tel:${second}">${second}</a>`;
+            } else {
+                infoText = "Sorry, no contact info available.";
+            }
+
+            document.getElementById('contactInfo').innerHTML = infoText;
+        });
+    </script>
+}
+
+
+
+
+
+
+
+

@@ -1,0 +1,772 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+
+<style>
+    .custom-form-wrapper {
+        background: #fff;
+        border: 1px solid #dee2e6;
+        border-radius: 12px;
+        padding: 24px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        margin: 0 auto;
+    }
+
+    @@media(min-width: 1200px) {
+        .custom-form-wrapper {
+            width: 818px; /* wider on large screens */
+        }
+
+        .service {
+            margin-left: 2rem;
+        }
+    }
+
+    .form-label {
+        font-weight: 500;
+        color: #5d6d7c;
+        font-size: 0.875rem;
+        margin-bottom: 4px;
+    }
+
+    .form-select {
+        border-radius: 10px;
+        padding: 0.75rem 1rem;
+        min-height: 48px;
+        font-size: 0.95rem;
+        width: 100%;
+    }
+
+    .form-icon {
+        display: flex;
+        align-items: center;
+        padding: 0 12px;
+        color: #5d6d7c;
+        background-color: #f1f3f5;
+        border-top-left-radius: 10px;
+        border-bottom-left-radius: 10px;
+    }
+
+    .input-group {
+        position: relative;
+        display: flex;
+        flex-wrap: nowrap;
+        align-items: stretch;
+        flex-direction: row;
+        width: 100%;
+    }
+
+
+
+    .search-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 48px;
+        width: 100%;
+        border-radius: 10px;
+        background-color: #0d6efd;
+        border: none;
+    }
+
+        .search-btn svg {
+            stroke: #fff;
+            width: 22px;
+            height: 22px;
+        }
+
+        .search-btn:hover {
+            background-color: #0b5ed7;
+        }
+
+    .form-controls.row.gx-4.gy-3.align-items-end {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: nowrap;
+    }
+
+    @@media (min-width: 768px) {
+        .search-btn {
+            width: 100%;
+        }
+
+        .form-controls.row.gx-4.gy-3.align-items-end {
+            flex-wrap: wrap;
+        }
+    }
+
+    /* Match Select2 appearance to Bootstrap form-select */
+    .select2-container .select2-selection--single {
+        height: 48px !important;
+        padding: 0.75rem 1rem;
+        border-radius: 10px;
+        border: 1px solid #ced4da;
+        font-size: 0.95rem;
+        display: flex;
+        align-items: center;
+    }
+
+    .select2-container--default .select2-selection--single .select2-selection__rendered {
+        color: #495057;
+        line-height: 1.5;
+    }
+
+    .select2-container--default .select2-selection--single .select2-selection__arrow {
+        height: 48px;
+        right: 10px;
+    }
+
+
+    .input-group .form-icon {
+        background-color: #e9ecef;
+        border: 1px solid #ced4da;
+        border-right: 0;
+        padding: 0.375rem 0.75rem;
+        border-top-left-radius: 0.375rem;
+        border-bottom-left-radius: 0.375rem;
+        display: flex;
+        align-items: center;
+    }
+
+    .input-group .form-select {
+        border-top-left-radius: 0;
+        border-bottom-left-radius: 0;
+    }
+
+    .select2-container--default .select2-results__option {
+        color: #000 !important; /* black text */
+        background-color: #fff !important; /* white background */
+    }
+
+    .select2-container--default .select2-results__option--highlighted {
+        background-color: #007bff !important; /* bootstrap primary */
+        color: #fff !important;
+    }
+
+    /* Default for mobile */
+    .search-icon {
+        width: 20px;
+        height: 20px;
+    }
+
+    /* On medium and larger screens */
+    @@media (min-width: 768px) {
+        .search-icon
+
+    {
+        width: 24px;
+        height: 24px;
+    }
+
+    }
+
+    /* On extra large screens */
+    @@media (min-width: 1200px) {
+        .search-icon
+
+    {
+        width: 28px;
+        height: 28px;
+    }
+
+    }
+
+    button{
+        background-color: transparent;
+    }
+
+    .service-btn {
+        background: linear-gradient(145deg, #1e293b, #0f172a);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 1rem;
+        padding: 1.5rem 1rem;
+        width: 100%;
+        max-width: 220px;
+        color: white;
+        font-weight: 500;
+        font-size: 1.1rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        cursor: pointer;
+    }
+
+        .service-btn:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 14px rgba(0, 0, 0, 0.3);
+            background: linear-gradient(145deg, #1e3a8a, #0f172a);
+        }
+
+    /* ===== Services Section Styling ===== */
+    .services-section {
+        background-color: #111827; /* Tailwind gray-900 */
+        padding: 5rem 1.5rem;
+        text-align: center;
+    }
+
+    .services-container {
+        max-width: 900px;
+        margin: 0 auto;
+    }
+
+    .services-title {
+        color: #fff;
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 3rem;
+        letter-spacing: 0.05em;
+    }
+
+    /* ===== Grid Layout ===== */
+    .services-grid {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 2rem;
+    }
+
+    /* Two per row on larger screens */
+    .service-btn {
+        background: transparent;
+        border: 1px solid #374151; /* gray-700 */
+        color: #fff;
+        border-radius: 1rem;
+        width: 300px;
+        padding: 2.5rem 1rem;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+        .service-btn .icon {
+            margin-bottom: 1rem;
+        }
+
+        .service-btn span {
+            font-size: 1.1rem;
+            font-weight: 600;
+            letter-spacing: 0.03em;
+        }
+
+        /* Hover effects */
+        .service-btn:hover {
+            background-color: #1f2937; /* gray-800 */
+            transform: translateY(-5px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Center the last alone button */
+        .service-btn.alone {
+            flex: 0 1 300px;
+            margin: 0 auto;
+        }
+
+    /* Center the "More Options" button */
+    #showMoreOptions {
+        display: block;
+        margin: 2rem auto 0 auto;
+        background-color: #374151; /* gray-700 */
+        transition: background-color 0.25s ease, transform 0.25s ease;
+    }
+
+        #showMoreOptions:hover {
+            background-color: #4b5563; /* gray-600 */
+            transform: translateY(-2px);
+        }
+
+
+    /* ===== Responsive ===== */
+    @@media (max-width: 640px) {
+        .service-btn
+
+    {
+        width: 100%;
+    }
+
+    }
+
+
+
+    .image-container {
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 1rem;
+    }
+
+    .responsive-image {
+        width: 80%;
+        max-width: 600px;
+        height: auto;
+        object-fit: contain;
+        transition: all 0.3s ease;
+    }
+
+    /* 📱 Small screens */
+    @@media (max-width: 640px) {
+        .responsive-image
+
+    {
+        width: 90%;
+        max-width: 320px;
+    }
+
+    }
+
+    /* 💻 Medium screens */
+    @@media (min-width: 641px) and (max-width: 1024px) {
+        .responsive-image
+
+    {
+        width: 70%;
+        max-width: 450px;
+    }
+
+    }
+
+    /* 🖥️ Large screens */
+    @@media (min-width: 1025px) {
+        .responsive-image
+
+    {
+        width: 100%;
+        max-width: 600px;
+    }
+
+    }
+</style>
+
+<main class="main">
+
+    <!-- Hero Section -->
+    <section id="hero" class="hero section dark-background">
+
+        <img src="assets/img/world-dotted-map.png" alt="" class="hero-bg" data-aos="fade-in">
+
+        <div class="container">
+            <div class="row gy-4 d-flex justify-content-between p-6">
+                <div class="col-lg-6 order-2 order-lg-1 d-flex flex-column justify-content-center">
+                    <h2 data-aos="fade-up">Find Your Nearest Service</h2>
+                    <p data-aos="fade-up" data-aos-delay="100">
+                        Find trusted truck repair shops near you — fast, reliable, and verified.
+                        Explore services, compare ratings, and get your truck back on the road.
+                    </p>
+
+                    <div class="container-fluid px-3">
+                        <form asp-controller="Home" asp-action="ServicesResults" method="post"
+                              class="custom-form-wrapper mb-4 shadow-sm rounded-3 p-4 bg-white"
+                              data-aos="fade-up" data-aos-delay="200">
+                            @Html.AntiForgeryToken()
+
+                            <div class="row g-3 align-items-end">
+
+                                <!-- Location -->
+                                <div class="col-12 col-md-5">
+                                    <label for="location" class="form-label fw-semibold">Location</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-light">
+                                            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 16 16">
+                                                <path d="M14 6.667C14 11.334 8 15.334 8 15.334S2 11.334 2 6.667a6 6 0 0112 0z" />
+                                                <circle cx="8" cy="6.667" r="2" />
+                                            </svg>
+                                        </span>
+
+                                        <!-- FIX: make it a <select> -->
+                                        <select id="location" name="location" class="form-select" style="width: 100%;" required>
+                                            <option value="">Search for a city</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+
+                                <!-- Service -->
+                                <div class="col-12 col-md-5">
+                                    <label for="service" class="form-label fw-semibold">Service</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-light">
+                                            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                                                <path d="M14.3 6.5L16 8.2a1 1 0 001.4 0l4-4a6 6 0 01-1.1 7.8l-6.9 6.9a6 6 0 01-8.5 0 6 6 0 010-8.5l6.9-6.9a6 6 0 017.8-1.1l-4 4a1 1 0 000 1.4z" />
+                                            </svg>
+                                        </span>
+                                        <select class="form-select" id="service" name="service" required>
+                                            <option value="">Select the service</option>
+                                            <option value="repair">Truck Repair</option>
+                                            <option value="repair">Trailer Repair</option>
+                                            <option value="repair">Tire Repair</option>
+                                            <option value="towing">Towing</option>
+                                            <option value="maintenance">Maintenance</option>
+                                            <option value="trailer" class="extra-option d-none">Trailer</option>
+                                            <option value="tire" class="extra-option d-none">Tire</option>
+                                            <option value="reefer" class="extra-option d-none">Reefer</option>
+                                            <option value="networks" class="extra-option d-none">Networks</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <!-- Search Button -->
+                                <div class="col-12 col-md-2">
+                                    <label class="form-label invisible">Search</label>
+                                    <button type="submit" class="btn btn-primary w-100 d-flex align-items-center justify-content-center gap-2" style="padding-top:11px; padding-bottom:11px;">                                       
+                                        Search
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+
+                </div>
+
+
+
+                <div class="col-lg-5 order-1 order-lg-2 hero-img" data-aos="zoom-out">
+                    <img src="assets/img/logo.png" class="img-fluid mb-3 mb-lg-0" alt="" style="z-index:0">
+                </div>
+            </div>
+            <section id="services" class="bg-gray-900 py-20">
+                <div class="services-container text-center">
+                    <h2 class="text-white text-3xl font-bold mb-6">Quick Breakdown Search</h2>
+
+                    <div class="services-grid">
+                        <!-- Service Button -->
+                        <button class="service-btn border border-gray-700 rounded-2xl py-10 px-6 flex flex-col items-center text-white hover:bg-gray-800 transition transform hover:-translate-y-1 hover:shadow-lg quick-service-btn"
+                                data-service="repair">
+                            <!-- Truck SVG -->
+                            <div class="mb-4">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="none"><path fill="#E6E6F5" d="M31.554 17.613a14.192 14.192 0 0 0-10.037 24.23 14.193 14.193 0 0 0 24.23-10.037 14.21 14.21 0 0 0-14.193-14.193m9.51 22.696L39.155 38.4l-1.004 1.003 1.904 1.912a12.7 12.7 0 0 1-7.793 3.228v-2.802h-1.42v2.802a12.7 12.7 0 0 1-7.792-3.228l1.908-1.908-1.004-1.003-1.907 1.907a12.7 12.7 0 0 1-3.233-7.796h2.803v-1.42h-2.803a12.7 12.7 0 0 1 3.232-7.792l1.908 1.907 1.003-1.003-1.907-1.908a12.7 12.7 0 0 1 7.793-3.232v2.802h1.42v-2.802c2.89.158 5.639 1.298 7.792 3.232l-1.908 1.907 1.004 1.004 1.911-1.907a12.7 12.7 0 0 1 3.229 7.792h-2.803v1.42h2.803a12.7 12.7 0 0 1-3.229 7.793"></path><path fill="#E6E6F5" d="M31.554 23.29a8.516 8.516 0 1 0 8.516 8.516 8.527 8.527 0 0 0-8.516-8.516m7.096 8.516a7 7 0 0 1-.259 1.874l-3.278-1.874 3.279-1.873c.17.61.256 1.24.258 1.873m-14.193 0c.002-.633.089-1.263.259-1.873l3.278 1.873-3.279 1.874a7 7 0 0 1-.258-1.874m8.516 0a1.42 1.42 0 1 1-2.84 0 1.42 1.42 0 0 1 2.84 0m.014-2.436a3 3 0 0 0-.337-.182l2.115-3.698q.684.346 1.278.828zm-2.866 0-3.052-3.052q.594-.482 1.277-.828l2.116 3.702q-.177.076-.341.178m-1.004 1.003q-.102.162-.181.337l-3.699-2.116a7 7 0 0 1 .829-1.277zm-.181 2.53q.078.174.181.336l-3.052 3.055a7 7 0 0 1-.828-1.277zm1.185 1.34q.162.102.336.181l-2.116 3.702a7 7 0 0 1-1.277-.828zm2.866 0 3.055 3.054a7 7 0 0 1-1.278.829l-2.115-3.702q.175-.078.337-.181m1.003-1.004q.102-.162.181-.336l3.702 2.115q-.346.684-.828 1.278zm.182-2.53a3 3 0 0 0-.182-.336l3.055-3.051c.32.395.599.823.828 1.277zm-.745-5.74-1.874 3.278-1.873-3.279a6.9 6.9 0 0 1 3.747 0M29.68 38.643l1.874-3.278 1.873 3.278a6.9 6.9 0 0 1-3.747 0M13.811 33.982V20.2a6.452 6.452 0 0 0-1.24-11.994.71.71 0 0 0-.889.686v3.753a1.42 1.42 0 1 1-2.838 0V8.892a.71.71 0 0 0-.888-.687A6.452 6.452 0 0 0 6.715 20.2v13.782a6.452 6.452 0 0 0 1.24 11.994.709.709 0 0 0 .888-.686v-3.58a1.433 1.433 0 0 1 2.434-.98c.26.259.407.612.405.98v3.58a.71.71 0 0 0 .888.687 6.452 6.452 0 0 0 1.241-11.995m-.71 10.298v-2.57a2.78 2.78 0 0 0-.823-1.987 2.84 2.84 0 0 0-2.047-.82 2.81 2.81 0 0 0-2.807 2.808v2.569a5.04 5.04 0 0 1 .269-9.183.71.71 0 0 0 .44-.657V19.742a.71.71 0 0 0-.44-.657 5.04 5.04 0 0 1-.269-9.183v2.743a2.84 2.84 0 0 0 5.678 0V9.902a5.039 5.039 0 0 1-.269 9.183.71.71 0 0 0-.441.657V34.44a.71.71 0 0 0 .441.657 5.038 5.038 0 0 1 .269 9.183M26.586 10.516h1.42a.7.7 0 0 0 .5-.208l1.42-1.42a.7.7 0 0 0 .208-.501v-1.42a.7.7 0 0 0-.208-.501l-1.42-1.42a.7.7 0 0 0-.5-.207h-1.42a.7.7 0 0 0-.502.207l-1.42 1.42a.7.7 0 0 0-.207.502v1.419a.7.7 0 0 0 .207.502l1.42 1.42a.7.7 0 0 0 .502.207m-.71-3.255 1.003-1.003h.832l1.004 1.003v.832L27.71 9.097h-.832l-1.003-1.004z"></path><path fill="#E6E6F5" d="M24.664 13.147a.7.7 0 0 0 .502.208h4.258a.7.7 0 0 0 .502-.208l2.839-2.839a.7.7 0 0 0 .208-.502V5.548a.7.7 0 0 0-.208-.501l-2.839-2.84A.7.7 0 0 0 29.424 2h-4.258a.7.7 0 0 0-.502.208l-2.838 2.839a.7.7 0 0 0-.208.501v4.258a.7.7 0 0 0 .208.502zm-1.627-7.305L25.46 3.42h3.67l2.423 2.423v3.67l-2.422 2.423H25.46l-2.423-2.422zM42.199 9.097h-1.42a.7.7 0 0 0-.502.207l-1.419 1.42a.7.7 0 0 0-.208.502v1.419a.7.7 0 0 0 .208.502l1.42 1.42a.7.7 0 0 0 .501.207h1.42a.7.7 0 0 0 .502-.208l1.419-1.42a.7.7 0 0 0 .208-.501v-1.42a.7.7 0 0 0-.208-.501l-1.42-1.42a.7.7 0 0 0-.501-.207m.71 3.254-1.004 1.004h-.832L40.07 12.35v-.832l1.003-1.003h.832l1.003 1.003z"></path><path fill="#E6E6F5" d="M46.959 9.304 44.12 6.466a.7.7 0 0 0-.502-.208H39.36a.7.7 0 0 0-.502.208L36.02 9.304a.7.7 0 0 0-.208.502v4.258a.7.7 0 0 0 .208.502l2.838 2.839a.7.7 0 0 0 .502.208h4.258a.7.7 0 0 0 .502-.208l2.839-2.839a.7.7 0 0 0 .208-.502V9.806a.7.7 0 0 0-.208-.502m-1.212 4.467-2.422 2.422h-3.671l-2.423-2.422V10.1l2.423-2.423h3.67l2.423 2.423z"></path></svg>
+                            </div>
+                            <span class="text-lg font-semibold tracking-wide">Truck</span>
+                        </button>
+
+                        <!-- Trailer -->
+                        <button class="service-btn border border-gray-700 rounded-2xl py-10 px-6 flex flex-col items-center text-white hover:bg-gray-800 transition transform hover:-translate-y-1 hover:shadow-lg quick-service-btn"
+                                data-service="trailer">
+                            <div class="mb-4">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="none"><path fill="#E6E6F5" d="M24.71 33.36c-1.566 0-2.839 1.292-2.839 2.88s1.273 2.88 2.839 2.88c1.565 0 2.838-1.292 2.838-2.88s-1.273-2.88-2.838-2.88m0 4.32c-.783 0-1.42-.646-1.42-1.44s.637-1.44 1.42-1.44 1.419.646 1.419 1.44-.637 1.44-1.42 1.44"></path><path fill="#E6E6F5" d="M34.645 30.48c-2.136 0-3.999 1.205-4.968 2.978-.968-1.773-2.831-2.978-4.967-2.978-3.13 0-5.678 2.584-5.678 5.76S21.58 42 24.71 42c2.136 0 3.999-1.205 4.967-2.978.97 1.773 2.832 2.978 4.968 2.978 3.13 0 5.678-2.584 5.678-5.76s-2.547-5.76-5.678-5.76M24.71 40.56c-2.349 0-4.258-1.938-4.258-4.32s1.91-4.32 4.258-4.32 4.258 1.938 4.258 4.32-1.91 4.32-4.258 4.32m9.935 0c-2.348 0-4.258-1.938-4.258-4.32s1.91-4.32 4.258-4.32 4.258 1.938 4.258 4.32-1.91 4.32-4.258 4.32"></path><path fill="#E6E6F5" d="M34.645 33.36c-1.565 0-2.839 1.292-2.839 2.88s1.274 2.88 2.84 2.88 2.838-1.292 2.838-2.88-1.273-2.88-2.839-2.88m0 4.32c-.783 0-1.42-.646-1.42-1.44s.637-1.44 1.42-1.44 1.42.646 1.42 1.44-.637 1.44-1.42 1.44"></path><path fill="#E6E6F5" d="M45.29 10.32c.393 0 .71-.322.71-.72V6.72a.714.714 0 0 0-.71-.72H4.84a.714.714 0 0 0-.71.72V9.6c0 .398.317.72.71.72h1.42v14.4h-2.13a.714.714 0 0 0-.71.72v2.88h-.71a.714.714 0 0 0-.709.72v3.6c0 .398.317.72.71.72h2.129v.72c0 .398.317.72.71.72h.71v5.76c0 .398.316.72.709.72h2.838c.393 0 .71-.322.71-.72V34.8h6.387c.189 0 .37-.075.502-.21l5.47-5.55H36.48l3.34 3.39c.133.135.313.21.502.21h4.968c.393 0 .71-.322.71-.72v-2.88a.714.714 0 0 0-.71-.72h-1.42v-18zM5.548 7.44h39.033v1.44H5.548zm-.71 18.72h1.42v2.16h-1.42zM3.42 31.92v-2.16h2.84v.72h-.71a.714.714 0 0 0-.71.72v.72zm5.678 7.92h-1.42V34.8h1.42zM44.58 31.2h-3.965l-3.34-3.39a.7.7 0 0 0-.502-.21H22.581a.7.7 0 0 0-.502.21l-5.47 5.55H6.259v-1.44h9.226c.188 0 .369-.076.502-.21l5.469-5.55h16.444l3.341 3.39c.132.134.313.21.502.21h2.838zm-2.13-2.88h-.415l-2.423-2.458V18.24a.714.714 0 0 0-.71-.72.714.714 0 0 0-.71.72v6.48h-4.257V12.48a.714.714 0 0 0-.71-.72.714.714 0 0 0-.71.72v12.24h-4.258V12.48a.714.714 0 0 0-.71-.72.714.714 0 0 0-.71.72v12.24h-4.257V12.48a.714.714 0 0 0-.71-.72.714.714 0 0 0-.71.72v12.24a.7.7 0 0 0-.502.21l-5.469 5.55H7.677V10.32h34.775z"></path><path fill="#E6E6F5" d="M10.516 28.32c.393 0 .71-.322.71-.72v-2.16a.714.714 0 0 0-.71-.72.714.714 0 0 0-.71.72v2.16c0 .398.318.72.71.72M10.516 23.28c.393 0 .71-.322.71-.72V12.48a.714.714 0 0 0-.71-.72.714.714 0 0 0-.71.72v10.08c0 .398.318.72.71.72M16.194 28.32c.392 0 .71-.322.71-.72V12.48a.714.714 0 0 0-.71-.72.714.714 0 0 0-.71.72V27.6c0 .398.317.72.71.72M38.903 16.08c.393 0 .71-.322.71-.72v-2.88a.714.714 0 0 0-.71-.72.714.714 0 0 0-.71.72v2.88c0 .398.318.72.71.72"></path></svg>
+                                
+                            </div>
+                            <span class="text-lg font-semibold tracking-wide">Trailer</span>
+                        </button>
+
+                        <!-- Tire -->
+                        <button class="service-btn border border-gray-700 rounded-2xl py-10 px-6 flex flex-col items-center text-white hover:bg-gray-800 transition transform hover:-translate-y-1 hover:shadow-lg quick-service-btn"
+                                data-service="tire">
+                            <div class="mb-4">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="none"><path fill="#FAFAFC" fill-rule="evenodd" d="M42.6 24.075c0 2.748-.595 5.481-1.718 7.967A4.62 4.62 0 0 1 42.6 35.64v3.084a4.63 4.63 0 0 1-2.066 3.855c1.243.83-35.512.83-34.268 0A4.63 4.63 0 0 1 4.2 38.724V35.64a4.62 4.62 0 0 1 1.718-3.598A19.4 19.4 0 0 1 4.2 24.075c0-10.628 8.613-19.274 19.2-19.274s19.2 8.646 19.2 19.274M23.399 6.343c-9.74 0-17.664 7.955-17.664 17.733 0 2.523.513 4.945 1.524 7.213a4.6 4.6 0 0 1 1.548-.274h5.39a11.5 11.5 0 0 1-2.318-6.94c0-6.376 5.168-11.564 11.52-11.564s11.52 5.188 11.52 11.565c0 2.535-.821 4.945-2.317 6.939h5.389c.544 0 1.064.1 1.549.274a17.6 17.6 0 0 0 1.523-7.213c0-9.778-7.924-17.733-17.664-17.733m2.346 21.708a4.64 4.64 0 0 0 1.61-1.61l5.326 1.337a10 10 0 0 1-2.08 3.237h-4.265zm-5.417-3.974c0 1.701 1.377 3.084 3.072 3.084a3.08 3.08 0 0 0 3.072-3.084c0-1.7-1.378-3.084-3.073-3.084a3.08 3.08 0 0 0-3.072 3.084m4.439 6.94h-2.735l.461-2.314h1.813zm-5.973-6.004v-1.88l-5.12-1.285a10 10 0 0 0-.256 2.225c0 .76.092 1.504.254 2.225zm-4.664-4.638a10.05 10.05 0 0 1 5.585-5.607l1.33 5.339a4.64 4.64 0 0 0-1.597 1.602zm6.927 7.676a4.64 4.64 0 0 1-1.61-1.61l-5.324 1.336a10 10 0 0 0 2.086 3.237h4.257zm.126-13.743a10 10 0 0 1 2.215-.257 10 10 0 0 1 2.217.257l-1.28 5.14h-1.873zm4.572 5.799a4.64 4.64 0 0 1 1.597 1.602l5.317-1.334a10.05 10.05 0 0 0-5.585-5.607zm7.372 1.744c.163.716.256 1.459.256 2.224 0 .759-.093 1.502-.255 2.225l-5.12-1.285v-1.88zm4.864 10.705H8.807c-1.41 0-2.59.963-2.947 2.265l.78.346 1.361-.603a.77.77 0 0 1 .62 0l1.362.603 1.365-.603a.77.77 0 0 1 .62 0l1.364.603 1.363-.603a.77.77 0 0 1 .619 0l1.365.603 1.366-.604a.77.77 0 0 1 .62 0l1.364.603 1.366-.604a.77.77 0 0 1 .62 0l1.365.604 1.367-.604a.77.77 0 0 1 .619 0l1.366.604 1.367-.604a.77.77 0 0 1 .618 0l1.367.604 1.364-.603a.77.77 0 0 1 .62 0l1.366.604 1.369-.604a.77.77 0 0 1 .618 0l1.37.604 1.369-.604a.77.77 0 0 1 .617 0l1.373.605.79-.348c-.361-1.301-1.54-2.264-2.95-2.264m.001 9.251H8.808c-1.39 0-2.552-.936-2.93-2.209l.453.2a.77.77 0 0 0 .62 0l1.36-.602 1.363.603c.196.086.42.087.619 0l1.365-.603 1.365.603a.77.77 0 0 0 .619 0l1.363-.603 1.365.603a.77.77 0 0 0 .619 0l1.366-.604 1.365.603a.77.77 0 0 0 .619 0l1.366-.604 1.366.603a.76.76 0 0 0 .618 0l1.368-.604 1.366.604a.77.77 0 0 0 .619 0l1.367-.604 1.368.604a.77.77 0 0 0 .619 0l1.364-.603 1.366.604a.77.77 0 0 0 .618 0l1.37-.604 1.369.604a.77.77 0 0 0 .618 0l1.37-.604 1.373.605a.77.77 0 0 0 .617 0l.464-.205c-.378 1.276-1.543 2.213-2.933 2.213m2.158-3.554.913-.403v-1.4l-.603.266a.77.77 0 0 1-.617 0l-1.373-.604-1.37.603a.77.77 0 0 1-.618 0l-1.37-.603-1.369.603a.77.77 0 0 1-.618 0l-1.366-.603-1.364.602a.77.77 0 0 1-.62 0l-1.367-.603-1.367.604a.77.77 0 0 1-.62 0l-1.366-.604-1.367.604a.76.76 0 0 1-.618 0l-1.366-.603-1.366.603a.77.77 0 0 1-.62 0l-1.364-.603-1.366.604a.77.77 0 0 1-.62 0l-1.364-.603-1.363.603a.77.77 0 0 1-.62 0l-1.364-.603-1.366.603a.77.77 0 0 1-.619 0l-1.362-.603-1.36.603a.77.77 0 0 1-.62 0l-.595-.263v1.399l.905.4 1.361-.603a.77.77 0 0 1 .62 0l1.363.603 1.364-.603a.77.77 0 0 1 .62 0l1.364.603 1.363-.603a.77.77 0 0 1 .62 0l1.364.603 1.366-.604a.77.77 0 0 1 .62 0l1.364.603 1.366-.604a.77.77 0 0 1 .62 0l1.365.604 1.368-.604a.77.77 0 0 1 .618 0l1.366.604 1.367-.604a.77.77 0 0 1 .618 0l1.367.604 1.364-.603a.77.77 0 0 1 .62 0l1.366.604 1.369-.604a.77.77 0 0 1 .618 0l1.37.604 1.369-.604a.77.77 0 0 1 .617 0z" clip-rule="evenodd"></path><path fill="#FAFAFC" d="M24.739 24.089c0 .743-.6 1.345-1.34 1.345s-1.339-.602-1.339-1.345.6-1.346 1.34-1.346 1.339.603 1.339 1.346M14.918 22.743h1.785v1.794h-1.785zM22.06 15.568h1.786v1.795H22.06zM30.098 22.743h1.786v1.794h-1.787z"></path></svg>
+                              
+                            </div>
+                            <span class="text-lg font-semibold tracking-wide">Tire</span>
+                        </button>
+
+                        <!-- Reefer -->
+                        <button class="service-btn border border-gray-700 rounded-2xl py-10 px-6 flex flex-col items-center text-white hover:bg-gray-800 transition transform hover:-translate-y-1 hover:shadow-lg quick-service-btn"
+                                data-service="reefer">
+                            <div class="mb-4">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="none"><path fill="#fff" fill-rule="evenodd" d="M4.178 10c-.466.139-.592.253-.645.321-.062.08-.165.28-.2.889v20.305h5.8v2h-6.18a1.62 1.62 0 0 1-1.62-1.62v-20.74l.002-.027c.04-.749.173-1.46.617-2.032.452-.582 1.093-.853 1.732-1.035q.222-.062.438-.061h40.116q.128 0 .26.021c.854.14 1.644.39 2.178 1.007.538.62.639 1.407.657 2.128v20.739a1.62 1.62 0 0 1-1.62 1.62h-6.38v-2h6v-20.32c-.017-.629-.115-.796-.168-.857-.056-.064-.242-.217-.96-.338zm26.755 23.515h-13v-2h13z" clip-rule="evenodd"></path><path fill="#fff" fill-rule="evenodd" d="M13.333 36a3 3 0 1 0 0-6 3 3 0 0 0 0 6m0 2a5 5 0 1 0 0-10 5 5 0 0 0 0 10M35.333 36.113a3 3 0 1 0 0-6 3 3 0 0 0 0 6m0 2a5 5 0 1 0 0-10 5 5 0 0 0 0 10" clip-rule="evenodd"></path><path fill="#fff" d="m16.654 21.53 3.186.83-1.797 1.137c-.184.131-.266.394-.143.59.081.132.204.219.347.219a.38.38 0 0 0 .204-.066l1.797-1.136-.837 3.388c-.061.24.082.48.286.524.04 0 .061.022.102.022a.4.4 0 0 0 .388-.328l1.083-4.24 2.655-1.705v3.322l-2.88 3.148c-.163.175-.163.459 0 .612a.4.4 0 0 0 .286.131.4.4 0 0 0 .286-.131l2.308-2.514v2.23c0 .24.184.437.408.437.225 0 .409-.197.409-.437v-2.23l2.287 2.514a.377.377 0 0 0 .572 0 .443.443 0 0 0 0-.612l-2.86-3.148v-3.3l2.615 1.749.98 4.284a.4.4 0 0 0 .388.328c.041 0 .062 0 .102-.022.225-.066.348-.285.307-.525l-.776-3.41 1.777 1.18a.4.4 0 0 0 .224.066.4.4 0 0 0 .348-.197.473.473 0 0 0-.123-.612l-1.777-1.18 3.207-.765c.224-.044.367-.284.306-.524-.04-.241-.266-.394-.49-.328l-4.024.94L25.11 20l2.696-1.727 4.003 1.027c.041 0 .062.022.102.022a.4.4 0 0 0 .389-.328c.06-.24-.082-.48-.307-.524l-3.166-.83 1.798-1.137c.184-.131.265-.394.143-.59-.123-.197-.368-.285-.552-.153l-1.797 1.136.837-3.388c.062-.24-.081-.48-.285-.524a.39.39 0 0 0-.49.306l-1.083 4.24-2.655 1.705v-3.322l2.88-3.148c.163-.175.163-.459 0-.612-.164-.175-.43-.175-.572 0l-2.308 2.514v-2.23c0-.24-.184-.437-.409-.437s-.408.197-.408.437v2.23l-2.288-2.514a.377.377 0 0 0-.572 0 .443.443 0 0 0 0 .612l2.86 3.148v3.3l-2.614-1.748-.98-4.285a.426.426 0 0 0-.491-.328c-.225.066-.347.285-.306.525l.776 3.41-1.777-1.159c-.184-.13-.45-.065-.572.132a.473.473 0 0 0 .123.612l1.776 1.18-3.206.765c-.225.044-.368.284-.306.524.04.197.204.35.408.35h.082l4.023-.94L23.557 20l-2.696 1.727-4.003-1.027c-.225-.066-.45.087-.49.327-.061.219.061.46.286.503"></path></svg>
+                               
+                            </div>
+                            <span class="text-lg font-semibold tracking-wide">Reefer</span>
+                        </button>
+
+                        <button class="service-btn border border-gray-700 rounded-2xl py-10 px-6 flex flex-col items-center text-white hover:bg-gray-800 transition transform hover:-translate-y-1 hover:shadow-lg quick-service-btn"
+                                data-service="towing">
+                            <div class="mb-4">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="none"><path fill="#E6E6F5" d="M39.826 29.306a.702.702 0 1 0 0-1.404H39.4a.702.702 0 1 0 0 1.404z"></path><path fill="#E6E6F5" fill-rule="evenodd" d="M12.516 38.064a2.271 2.271 0 0 1-4.54 0 2.271 2.271 0 0 1 4.54 0m-1.406 0a.864.864 0 0 0-1.728 0 .864.864 0 0 0 1.728 0" clip-rule="evenodd"></path><path fill="#E6E6F5" d="M18.652 27.528a.703.703 0 0 0-.704.702v.44a.703.703 0 0 0 1.407 0v-.44a.7.7 0 0 0-.704-.702M32.672 22.206h1.189a.703.703 0 1 0 0-1.404h-1.19a.702.702 0 1 0 0 1.404M32.672 24.189h1.189a.703.703 0 1 0 0-1.405h-1.19a.702.702 0 1 0 0 1.405M32.672 26.178h1.189a.703.703 0 1 0 0-1.405h-1.19a.703.703 0 1 0 0 1.405"></path><path fill="#E6E6F5" fill-rule="evenodd" d="M43.889 17.45c1.056 0 2.017.664 2.39 1.652.94 2.566 1.548 4.123 1.938 5.124.584 1.495.683 1.749.683 2.274v9.256c0 .904-.737 1.64-1.643 1.64h-2.33q.043.329.044.67A5.145 5.145 0 0 1 39.83 43.2a5.145 5.145 0 0 1-5.143-5.135q.002-.34.045-.669H32.57v.971a1.5 1.5 0 0 1-1.5 1.497h-9.817a1.5 1.5 0 0 1-1.5-1.497v-.97H15.35q.044.327.045.668A5.145 5.145 0 0 1 8.5 42.894a.702.702 0 1 1 .48-1.32 3.738 3.738 0 0 0 5.01-3.508 3.74 3.74 0 0 0-3.737-3.732 3.74 3.74 0 0 0-3.737 3.731c0 .722.208 1.422.6 2.027a.704.704 0 0 1-1.18.764 5.1 5.1 0 0 1-.78-3.46h-.327v1.414a.7.7 0 0 1-.703.703H1.603a.702.702 0 1 1 0-1.405h1.818v-.716A2.674 2.674 0 0 1 .9 34.727V29.78a.703.703 0 0 1 1.406 0v1.127h8.81V29.78a.703.703 0 0 1 1.406 0v1.127h2v-2.052c0-1.216.53-2.311 1.371-3.067v-2.895a.702.702 0 0 1 0-1.313v-3.175a.702.702 0 0 1 0-1.313v-3.245L8.07 9.492l-.5.893v7.245a3.24 3.24 0 0 1 2.537 3.157 3.24 3.24 0 0 1-6.478 0 .703.703 0 0 1 1.406 0 1.833 1.833 0 0 0 3.665 0c0-1.009-.822-1.83-1.832-1.83a.7.7 0 0 1-.703-.702v-5.35l-.283.506a.703.703 0 0 1-1.229-.684l3.062-5.484a2.4 2.4 0 0 1 1.455-1.15 2.4 2.4 0 0 1 1.842.214l1.19.663a.702.702 0 1 1-.684 1.226l-1.19-.662a1.01 1.01 0 0 0-.774-.09 1 1 0 0 0-.61.482l-.19.34 7.206 4.01c.106-.472.333-.9.648-1.246l-2.62-1.459a.702.702 0 1 1 .684-1.226l3.333 1.855q.313-.076.648-.078a2.76 2.76 0 0 1 2.76 2.756v4.214a.702.702 0 0 1 0 1.313v3.175a.702.702 0 0 1 0 1.313v2.895a4.11 4.11 0 0 1 1.372 3.067v2.052h4.05v-1.872a1.79 1.79 0 0 1 1.79-1.786h.648v-3.125a.703.703 0 0 1 1.406 0v11.868h4.447a5.15 5.15 0 0 1 4.703-3.062 5.15 5.15 0 0 1 4.703 3.062h2.726c.13 0 .236-.106.236-.236v-.953h-.857a.703.703 0 1 1 0-1.405h.857v-6.72h-9.648a1.35 1.35 0 0 1-1.351-1.349v-6.474h-5.32a.497.497 0 0 0-.496.496v1.965a.702.702 0 0 1-1.406 0v-1.965c0-1.048.853-1.9 1.903-1.9h6.804v-1.244a2.652 2.652 0 0 1 5.302 0v1.244zm-15.266 11.2a.383.383 0 0 0-.383.383v1.872h1.031v-2.254zm-8.616-7.116h-2.708v-3.083h2.708zm0-4.487V12.88a1.354 1.354 0 0 0-2.708 0v4.168zm-2.708 5.89h2.708v2.02a4.1 4.1 0 0 0-2.708 0zm1.35 3.197a2.727 2.727 0 0 0-2.726 2.722v2.052h5.452v-2.052c0-1.501-1.223-2.722-2.726-2.722m-8.397 6.796a5.15 5.15 0 0 0-4.703 3.062H3.573a1.267 1.267 0 0 1-1.267-1.265v-2.416h26.967v3.68H14.955a5.15 5.15 0 0 0-4.703-3.06m20.82 5.53a.093.093 0 0 0 .093-.093v-.971H21.162v.971c0 .051.041.093.092.093zm8.756 3.335a3.74 3.74 0 0 1-3.737-3.731 3.74 3.74 0 0 1 3.737-3.73 3.74 3.74 0 0 1 3.736 3.73 3.74 3.74 0 0 1-3.736 3.73m.804-26.833c-.687 0-1.245.558-1.245 1.243v1.243h2.49v-1.243c0-.685-.559-1.243-1.245-1.243m3.256 3.894c.475 0 .907.298 1.075.742l2.145 5.677h-.192l-1.89-1.888.17-.17a.7.7 0 0 0 0-.993.704.704 0 0 0-.995 0l-1.334 1.332a.701.701 0 1 0 .994.993l.17-.17.896.896h-3.686l-.462-2.786a2.7 2.7 0 0 0-2.673-2.264H37.9v-1.37zm-5.782 2.772H37.9v3.646h1.915l-.425-2.557a1.3 1.3 0 0 0-1.285-1.088" clip-rule="evenodd"></path><path fill="#E6E6F5" fill-rule="evenodd" d="M37.559 38.064a2.271 2.271 0 0 1 4.54 0 2.271 2.271 0 0 1-4.54 0m1.406 0a.864.864 0 0 0 1.728 0 .865.865 0 0 0-1.728 0" clip-rule="evenodd"></path></svg>
+                                
+                            </div>
+                            <span class="text-lg font-semibold tracking-wide">Towing</span>
+                        </button>
+
+                        <button class="service-btn border border-gray-700 rounded-2xl py-10 px-6 flex flex-col items-center text-white hover:bg-gray-800 transition transform hover:-translate-y-1 hover:shadow-lg quick-service-btn"
+                                data-service="networks">
+                            <div class="mb-4">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="none"><path fill="#E6E6F5" d="M46.072 11.622c-.287-.597-.79-1.53-2.01-1.53a4.7 4.7 0 0 0-1.58.372c-.574.187-1.04.71-1.184 1.307l-.359 1.531c-.466.224-.969.374-1.507.486-1.15.186-2.047 1.157-2.226 2.352a2.3 2.3 0 0 0-.682.336c0-.56-.251-1.12-.646-1.456l-.646-.56c-.18-.859-.898-1.494-1.76-1.494h-.645a8.6 8.6 0 0 0-2.405.448c-.036-.074-.072-.149-.144-.224-.718-1.045-2.19-1.232-2.656-1.27l-10.985-.933c-1.328-.373-6.82-1.941-8.758-1.941-.144 0-.324 0-.467.037A1.635 1.635 0 0 0 5.868 8c-1.364 0-1.902 1.606-2.082 2.166a2.2 2.2 0 0 0-.107.672l.107 3.062-1.148 2.203a1.8 1.8 0 0 0-.216 1.045l.036.859-.538.933a1.94 1.94 0 0 0-.144 1.606l1.041 2.8.431 3.996c.072.71.538 1.307 1.185 1.568l1.112.41.036.188c.108.634.539 1.194 1.113 1.418l7.143 2.95c.216.075.431.15.682.15.395 0 .79-.15 1.113-.411.072.112.144.187.18.299.861 1.755 1.974 2.576 3.41 2.576.18 0 .359 0 .538-.037.072.112.144.261.215.373.646 1.046 1.58 2.614 3.303 3.062q.43.112.861.112c.539 0 1.041-.187 1.436-.597.431-.523.646-1.233.575-1.942 0-.15 0-.336.035-.486a9.3 9.3 0 0 1 1.58-.858 13 13 0 0 0 2.405.224c.933 0 2.225-.112 2.907-1.083.072-.112.144-.224.18-.336.18.112.323.224.467.336.323.336.753.523 1.184.523.18 0 .395-.038.575-.112 0 .074.036.112.036.186.323 1.233.681 1.942 2.584 3.36.538.374 1.22.449 1.795.188 1.83-.897 2.62-2.54 2.01-4.22a9.4 9.4 0 0 0-1.4-2.315c-.287-.373-.861-1.12-.861-1.344.143-.486 1.328-2.166 3.338-4.332.61-.634.682-1.643.144-2.39a7.5 7.5 0 0 1-.575-.895c.898-.449 1.149-1.606 1.328-2.689a3 3 0 0 1 1.185-.597c.897-.3 1.436-.822 1.58-1.569a2.06 2.06 0 0 0-.61-1.83c.61-.335 1.363-.784 1.579-1.754.215-1.008-.288-1.905-.862-2.726a8 8 0 0 1-.682-1.12m-1.687 4.892c-1.471 1.045 2.262 2.016.216 2.688s-2.118 1.606-2.118 1.606c-.43 2.539-.61 1.53-1.508 1.941-.754.336.503 2.24 1.005 2.95.108.15.072.336-.036.485-.753.822-3.41 3.734-3.697 5.004-.359 1.494 1.723 2.838 2.334 4.518.502 1.344-.754 2.091-1.257 2.352-.036.038-.107.038-.143.038a.5.5 0 0 1-.216-.075c-2.261-1.68-1.687-1.904-2.369-3.547-.215-.523-.43-.71-.646-.71-.395 0-.754.56-1.041.56a.27.27 0 0 1-.18-.074c-.323-.336-1.723-1.232-2.44-1.232-.36 0-.539.224-.36.784.252.858-.717 1.083-1.794 1.083-.826 0-1.616-.112-2.441-.262h-.144a8.4 8.4 0 0 0-2.225 1.12c-1.257.86-.036 2.764-1.22 2.764a2 2 0 0 1-.503-.075c-1.975-.523-2.657-3.547-3.482-3.547h-.072a3.5 3.5 0 0 1-.898.112c-.646 0-1.4-.299-2.117-1.793-.467-.896-.97-1.157-1.4-1.157-.36 0-.682.15-.934.373a.5.5 0 0 1-.215.075c-.036 0-.072 0-.144-.037l-7.143-2.95a.32.32 0 0 1-.215-.299l-.108-.747a.46.46 0 0 0-.215-.298l-1.723-.635c-.144-.038-.216-.15-.216-.299l-.466-4.182c0-.037 0-.075-.036-.075l-1.077-2.95c0-.111 0-.223.036-.335l.682-1.233c.036-.074.036-.15.036-.224l-.108-1.307c0-.074 0-.149.036-.224l1.328-2.427c.036-.074.036-.112.036-.186l-.108-3.398c0-.038 0-.075.036-.15.072-.261.431-1.157.754-1.157.144 0 .287.187.395.672.215.896.43 1.232.646 1.232.18 0 .323-.298.43-.71.037-.111.216-.149.54-.149 1.866 0 7.968 1.793 8.47 1.942h.072l11.128.97s2.01.113 1.651 1.233c-.143.41.036.56.287.56.108 0 .18 0 .287-.037 1.006-.261 2.082-.71 3.123-.71h.646c.18 0 .36.15.36.337v.26c0 .113.035.188.143.262l1.005.859c.144.112.18.299.072.448l-.287.598c-.072.149-.036.298.071.448l.934 1.008a.37.37 0 0 1 .072.373.393.393 0 0 0 .215.486c.036 0 .072.037.108.037a.38.38 0 0 0 .25-.112l.432-.41a.35.35 0 0 0 .107-.262c.072-.971.503-1.232.934-1.232.107 0 .215 0 .323.037h.072c.179 0 .359-.187.359-.373v-.038c-.072-.672.035-1.718 1.112-1.904a7.4 7.4 0 0 0 2.334-.859c.071-.037.143-.15.143-.224l.467-2.016c.036-.112.107-.224.215-.262.36-.15.718-.224 1.113-.298.61 0 .538.672 1.543 2.09 1.329 2.017.216 1.83-1.256 2.876"></path></svg>
+                               
+                            </div>
+                            <span class="text-lg font-semibold tracking-wide">Networks</span>
+                        </button>
+
+                        <div class="mt-8">
+                            <button type="button"
+                                    class="bg-gray-700 text-white py-2 px-6 rounded-lg hover:bg-gray-600 transition service-btn"
+                                    id="showMoreOptions">
+                                More Options
+                            </button>
+                        </div>
+
+                    </div>
+                </div>
+            </section>
+
+        </div>
+
+    </section><!-- /Hero Section -->
+
+    <section class="container py-14 md:py-28">
+        <!-- Header -->
+        <div class="text-center mb-10 md:mb-16">
+            <h2 class="text-[28px] md:text-[44px] text-black-100 font-bold">
+                Manage Breakdowns Better with
+            </h2>
+            <h2 class="text-[28px] md:text-[44px] text-primary font-bold">
+                Truck Service®
+            </h2>
+        </div>
+
+        <!-- Feature + Image layout -->
+        <div class="flex flex-col lg:flex-row items-start gap-12">
+
+            <!-- Left: Features -->
+            <div class="w-full lg:w-1/2 space-y-10">
+                <!-- Feature 1 -->
+                <div class="flex flex-col md:flex-row items-center md:items-start">
+                    <div>
+                        <svg width="48" height="48" fill="none" stroke="currentColor" stroke-width="2"><!-- icon --></svg>
+                    </div>
+                    <div class="md:ml-6 md:mt-[8px]">
+                        <h2 class="text-black-100 text-xl font-bold mb-3 text-center md:text-left">
+                            Nearby Repair Shops
+                        </h2>
+                        <p class="text-black-100 text-sm text-center md:text-left">
+                            Instantly view the nearest truck repair shops based on your GPS location, anywhere in the country.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Feature 2 -->
+                <div class="flex flex-col md:flex-row items-center md:items-start">
+                    <div>
+                        <svg width="48" height="48" fill="none" stroke="currentColor" stroke-width="2"><!-- icon --></svg>
+                    </div>
+                    <div class="md:ml-6 md:mt-[8px]">
+                        <h2 class="text-black-100 text-xl font-bold mb-3 text-center md:text-left">
+                            24/7 Towing Services
+                        </h2>
+                        <p class="text-black-100 text-sm text-center md:text-left">
+                            Find round-the-clock towing providers for breakdowns, accidents, or long-distance transport needs.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Feature 3 -->
+                <div class="flex flex-col md:flex-row items-center md:items-start">
+                    <div>
+                        <svg width="48" height="48" fill="none" stroke="currentColor" stroke-width="2"><!-- icon --></svg>
+                    </div>
+                    <div class="md:ml-6 md:mt-[8px]">
+                        <h2 class="text-black-100 text-xl font-bold mb-3 text-center md:text-left">
+                            Verified Vendor Listings
+                        </h2>
+                        <p class="text-black-100 text-sm text-center md:text-left">
+                            All listings are manually verified and updated regularly to ensure accuracy and reliability.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+
+            <!-- Right: Image -->
+            <div class="image-container">
+                <img src="~/assets/img/logo.png" alt="dashboard-illustration" class="responsive-image" />
+            </div>
+
+        </div>
+    </section>
+
+
+
+
+
+    <!-- About Section -->
+    <section id="about" class="about section">
+
+        <div class="container">
+
+            <div class="row gy-4">
+
+                <div class="col-lg-6 position-relative align-self-start order-lg-last order-first" data-aos="fade-up" data-aos-delay="200">
+                    <img src="assets/img/about.jpg" class="img-fluid" alt="">
+                </div>
+
+                <div class="col-lg-6 content order-last  order-lg-first" data-aos="fade-up" data-aos-delay="100">
+                    <h3>About Us</h3>
+                    <p>
+                        With over 5 years of experience in the logistics and transport industry, we understand the challenges of finding reliable truck service providers. That’s why we built this platform — a smarter, simpler way to connect users with trusted truck repair and service shops based on location and specific needs.
+                    </p>
+                    <p>
+                        We’ve operated a similar site in the past, but due to unforeseen issues, it was taken down. Now, we’re back with a more powerful and user-friendly version, ready to serve both customers and shop owners better than ever. Our goal remains the same: to be the most dependable and efficient service network in the market.
+                    </p>
+                    <ul>
+                        <li>
+                            <i class="bi bi-diagram-3"></i>
+                            <div>
+                                <h5>Trusted by Industry Professionals</h5>
+                                <p>We’ve worked with hundreds of service providers and clients across logistics sector.</p>
+                            </div>
+                        </li>
+                        <li>
+                            <i class="bi bi-fullscreen-exit"></i>
+                            <div>
+                                <h5>Improved, Modern Platform</h5>
+                                <p>Our new system makes it easier than ever to find, compare, and connect with truck service shops.</p>
+                            </div>
+                        </li>
+                        <li>
+                            <i class="bi bi-broadcast"></i>
+                            <div>
+                                <h5>Built on Experience</h5>
+                                <p>Backed by years of on-ground logistics knowledge, we know exactly what both truck owners and service shops need.</p>
+                            </div>
+                        </li>
+                    </ul>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </section><!-- /About Section -->
+    <!-- Call To Action Section -->
+    <section id="call-to-action" class="call-to-action section dark-background">
+
+        <img src="assets/img/cta-bg.jpg" alt="">
+
+        <div class="container">
+            <div class="row justify-content-center" data-aos="zoom-in" data-aos-delay="100">
+                <div class="col-xl-10">
+                    <div class="text-center">
+                        <h3>Get Listed Today</h3>
+                        <p>Our platform helps users find truck service shops based on location and the services they need. If you own a shop, listing with us makes it easier for potential customers to discover you. Reach out to get your business featured on our site.</p>
+                        <a class="btn-getstarted cta-btn" asp-area="" asp-controller="Home" asp-action="ContactUs">Contact Us to Get Listed</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </section><!-- /Call To Action Section -->
+
+</main>
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            // Initialize Select2 on city dropdown
+            $('.select2-city').select2({
+                placeholder: "Where do you need service?",
+                allowClear: true,
+                    width: '100%',
+                dropdownCssClass: 'form-select',   // Style the dropdown
+                selectionCssClass: 'form-select'   // Style the input box
+            });
+
+            // Detect 'Use My Location' option
+            $('#location').on('change', function () {
+                if ($(this).val() === 'use-my-location') {
+                    if (navigator.geolocation) {
+                        navigator.geolocation.getCurrentPosition(function (position) {
+                            const lat = position.coords.latitude;
+                            const lon = position.coords.longitude;
+
+                            // Dummy: map coordinates to New York
+                            $('#location').val('new-york').trigger('change');
+                            alert("Location detected: New York (dummy)");
+                        }, function () {
+                            alert("Could not detect location.");
+                        });
+                    } else {
+                        alert("Geolocation not supported.");
+                    }
+                }
+            });
+        });
+    </script>
+
+    <script>
+        document.querySelectorAll('.quick-service-btn').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                const service = btn.getAttribute('data-service');
+                const serviceSelect = document.getElementById('service');
+                const locationInput = document.getElementById('location');
+
+                // Show hidden options if needed
+                const option = serviceSelect.querySelector(`option[value="${service}"]`);
+                if (option.classList.contains('d-none')) {
+                    option.classList.remove('d-none');
+                }
+
+                // Set dropdown value
+                serviceSelect.value = service;
+
+                // Focus location input
+                setTimeout(() => {
+                    $('#location').select2('open');
+                }, 200);
+            });
+        });
+
+           document.getElementById('showMoreOptions').addEventListener('click', function () {
+            // Reveal extra service options
+            document.querySelectorAll('#service option.extra-option').forEach(opt => {
+                opt.classList.remove('d-none');
+            });
+
+            // Focus on the service dropdown
+            const serviceSelect = document.getElementById('service');
+            serviceSelect.focus();
+
+            // Optional: Add a quick highlight to guide user
+            serviceSelect.classList.add('highlight-border');
+            setTimeout(() => {
+                serviceSelect.classList.remove('highlight-border');
+            }, 1500);
+        });
+
+                                     $(document).ready(function () {
+            $("#location").select2({
+                placeholder: "Search for a city",
+                minimumInputLength: 0,
+                ajax: {
+                    url: '/Home/SearchCities',
+                    dataType: 'json',
+                    delay: 250,
+                    data: function (params) {
+                        return { term: params.term || "" };
+                    },
+                             processResults: function (data) {
+        var results = [{
+            id: "use-my-location",
+            text: "📍 Use My Location"
+        }];
+
+        data.forEach(function (cityObj) {
+            let label = `${cityObj.city}${cityObj.state ? ', ' + cityObj.state : ''}, ${cityObj.country}`;
+            results.push({ id: label, text: label });
+        });
+
+        return { results: results };
+    }
+
+
+                }
+            });
+
+            // Handle when "Use My Location" is selected
+            $('#location').on('select2:select', function (e) {
+                if (e.params.data.id === "use-my-location") {
+                    console.log("User chose their location!");
+                    // 👉 trigger geolocation logic here if needed
+                }
+            });
+        });
+
+
+    </script>
+
+}
+
+
