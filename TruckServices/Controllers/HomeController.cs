@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using TruckServices.Data;
 using TruckServices.Models;
+using TruckServices.Services;
 using static System.Net.WebRequestMethods;
 
 namespace TruckServices.Controllers
@@ -18,13 +19,15 @@ namespace TruckServices.Controllers
         private readonly EmailSender.EmailSender _emailSender;
         private readonly IHttpClientFactory _httpClientFactory;
         private static readonly MemoryCache _cache = new MemoryCache(new MemoryCacheOptions());
+        private readonly GeoapifyService _geoapifyService;
 
-        public HomeController(ILogger<HomeController> logger, ApplicationDbContext context, EmailSender.EmailSender emailSender, IHttpClientFactory httpClientFactory)
+        public HomeController(ILogger<HomeController> logger, ApplicationDbContext context, EmailSender.EmailSender emailSender, IHttpClientFactory httpClientFactory, GeoapifyService geoapifyService)
         {
             _context = context;
             _logger = logger;
             _emailSender = emailSender;
             _httpClientFactory = httpClientFactory;
+            _geoapifyService = geoapifyService;
         }
 
         public async Task<IActionResult> Index()
@@ -94,76 +97,139 @@ namespace TruckServices.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> ServicesResults(string location, string service, int page = 1)
+        public async Task<IActionResult> ServicesResults(string location, string service, int page = 1, int radius = 50)
         {
-            int pageSize = 10; // 10 items per page
-
-            // Split the location if it contains commas
-            string city = null, state = null, country = null;
-            if (!string.IsNullOrWhiteSpace(location))
+            try
             {
-                var parts = location.Split(',', StringSplitOptions.RemoveEmptyEntries)
-                                    .Select(p => p.Trim())
-                                    .ToArray();
+                int pageSize = 10;
 
-                if (parts.Length > 0) city = parts[0];
-                if (parts.Length > 1) state = parts[1];
-                if (parts.Length > 2) country = parts[2];
+                // -----------------------------
+                // Parse location (city, state, country)
+                // -----------------------------
+                string city = null, state = null, country = null;
+
+                if (!string.IsNullOrWhiteSpace(location))
+                {
+                    var parts = location.Split(',', StringSplitOptions.RemoveEmptyEntries)
+                                        .Select(p => p.Trim())
+                                        .ToArray();
+
+                    if (parts.Length > 0) city = parts[0];
+                    if (parts.Length > 1) state = parts[1];
+                    if (parts.Length > 2) country = parts[2];
+                }
+
+                var query = _context.CustomersData.AsQueryable();
+
+                if (!string.IsNullOrEmpty(city))
+                    query = query.Where(x => x.City != null && x.City.ToLower() == city.ToLower());
+
+                if (!string.IsNullOrEmpty(state))
+                    query = query.Where(x => x.State != null && x.State.ToLower() == state.ToLower());
+
+                if (!string.IsNullOrEmpty(country))
+                    query = query.Where(x => x.Country != null && x.Country.ToLower() == country.ToLower());
+
+                int totalCount = await query.CountAsync();
+
+                // ---------------------------------------------------------------
+                // If no direct match → try nearest city with Geoapify service
+                // ---------------------------------------------------------------
+                if (totalCount == 0 && !string.IsNullOrEmpty(location))
+                {
+                    try
+                    {
+                        var nearest = await _geoapifyService.GetNearestDifferentCityAsync(location, radius);
+
+                        if (nearest != null)
+                        {
+                            string nearestCity = nearest.Value.city;
+                            string nearestState = nearest.Value.state;
+                            string nearestCountry = nearest.Value.country;
+
+                            if (!string.IsNullOrEmpty(country) &&
+                                nearestCountry?.Equals(country, StringComparison.OrdinalIgnoreCase) == true)
+                            {
+                                query = _context.CustomersData.Where(
+                                    x => x.City != null && x.City.ToLower() == nearestCity.ToLower() &&
+                                         x.Country != null && x.Country.ToLower() == nearestCountry.ToLower());
+
+                                if (!string.IsNullOrEmpty(state) && !string.IsNullOrEmpty(nearestState))
+                                {
+                                    query = query.Where(x =>
+                                        x.State != null &&
+                                        x.State.ToLower() == nearestState.ToLower());
+                                }
+
+                                totalCount = await query.CountAsync();
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        // Log only, do NOT show technical details to user
+                        _logger.LogError(ex, "Geoapify API failed.");
+                    }
+                }
+
+                // -----------------------------
+                // Fetch providers
+                // -----------------------------
+                var list = await query
+                    .OrderByDescending(x => x.IsPaid)
+                    .ThenBy(x => EF.Functions.Random())
+                    .Skip((page - 1) * pageSize)
+                    .Take(pageSize)
+                    .ToListAsync();
+
+                var tasks = list.Select(async p => new ServicesProviders
+                {
+                    Id = p.Id,
+                    CompanyName = p.CompanyName,
+                    StreetAddress = p.StreetAddress,
+                    City = p.City,
+                    State = p.State,
+                    Country = p.Country,
+                    MobileNumber = p.MobileNumber,
+                    SecondMobileNumber = p.SecondMobileNumber,
+                    Email = p.Email,
+                    Source = p.Source,
+                    ImageBase64 = p.ImageUrl != null
+                        ? $"data:{GetImageMimeType(p.ImageUrl)};base64,{Convert.ToBase64String(p.ImageUrl)}"
+                        : "https://www.gynprog.com.br/wp-content/uploads/2017/06/wood-blog-placeholder.jpg",
+                    Status = "Open"
+                }).ToList();
+
+                var mappedList = (await Task.WhenAll(tasks)).ToList();
+
+                return View(new ServiceResultsViewModel
+                {
+                    Providers = mappedList,
+                    CurrentPage = page,
+                    TotalCount = totalCount,
+                    PageSize = pageSize,
+                    Location = location,
+                    Service = service,
+                    ErrorMessage = totalCount == 0 ? "No results found for your search." : ""
+                });
             }
-
-            // Build query dynamically
-            var query = _context.CustomersData.AsQueryable();
-
-            if (!string.IsNullOrEmpty(city))
-                query = query.Where(x => x.City != null && x.City.ToLower() == city.ToLower());
-
-            if (!string.IsNullOrEmpty(state))
-                query = query.Where(x => x.State != null && x.State.ToLower() == state.ToLower());
-
-            if (!string.IsNullOrEmpty(country))
-                query = query.Where(x => x.Country != null && x.Country.ToLower() == country.ToLower());
-
-
-            int totalCount = await query.CountAsync();
-
-            var list = await query
-      .OrderByDescending(x => x.IsPaid)
-      .ThenBy(x => EF.Functions.Random())
-      .Skip((page - 1) * pageSize)
-      .Take(pageSize)
-      .ToListAsync();
-
-            var tasks = list.Select(async p => new ServicesProviders
+            catch (Exception ex)
             {
-                Id = p.Id,
-                CompanyName = p.CompanyName,
-                StreetAddress = p.StreetAddress,
-                City = p.City,
-                State = p.State,
-                Country = p.Country,
-                MobileNumber = p.MobileNumber,
-                SecondMobileNumber = p.SecondMobileNumber,
-                Email = p.Email,
-                Source = p.Source,
-                ImageBase64 = p.ImageUrl != null
-    ? $"data:{GetImageMimeType(p.ImageUrl)};base64,{Convert.ToBase64String(p.ImageUrl)}"
-    : "https://www.gynprog.com.br/wp-content/uploads/2017/06/wood-blog-placeholder.jpg",
-                Status =  "Open" 
-            }).ToList();
+                // Log actual exception
+                _logger.LogError(ex, "ServicesResults failed.");
 
-            var mappedList = (await Task.WhenAll(tasks)).ToList();
+                // Send safe user message
+                var vm = new ServiceResultsViewModel
+                {
+                    Providers = new List<ServicesProviders>(),
+                    CurrentPage = 1,
+                    TotalCount = 0,
+                    PageSize = 10,
+                    ErrorMessage = "Something went wrong. Please try again."
+                };
 
-            var viewModel = new ServiceResultsViewModel
-            {
-                Providers = mappedList,
-                CurrentPage = page,
-                TotalCount = totalCount,
-                PageSize = pageSize,
-                Location = location,
-                Service = service
-            };
-
-            return View(viewModel);
+                return View(vm);
+            }
         }
 
 
@@ -238,41 +304,5 @@ namespace TruckServices.Controllers
             }
             return "image/png"; // default
         }
-
-        //private async Task<bool?> GetBusinessOpenStatusAsync(string companyName, string address)
-        //{
-        //    try
-        //    {
-        //        var apiKey = "AIzaSyApZjWD6kvwPxnPwxRalfvc65VVWdKLb9Y";
-        //        var query = $"{companyName} {address}";
-
-        //        var url = "https://places.googleapis.com/v1/places:searchText";
-
-        //        using var client = new HttpClient();
-        //        client.DefaultRequestHeaders.Add("X-Goog-Api-Key", apiKey);
-        //        client.DefaultRequestHeaders.Add("X-Goog-FieldMask", "places.displayName,places.businessStatus,places.openingHours");
-
-        //        var requestBody = new
-        //        {
-        //            textQuery = query
-        //        };
-
-        //        var response = await client.PostAsJsonAsync(url, requestBody);
-        //        var json = await response.Content.ReadAsStringAsync();
-        //        Console.WriteLine(json);
-
-        //        var result = JsonSerializer.Deserialize<NewPlacesResponse>(json);
-        //        var place = result?.Places?.FirstOrDefault();
-
-        //        // businessStatus: OPERATIONAL, CLOSED_TEMPORARILY, CLOSED_PERMANENTLY
-        //        // openingHours.openNow: true/false
-        //        return place?.OpeningHours?.OpenNow;
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        Console.WriteLine($"Error fetching business status: {ex.Message}");
-        //        return null;
-        //    }
-        //}
     }
 }

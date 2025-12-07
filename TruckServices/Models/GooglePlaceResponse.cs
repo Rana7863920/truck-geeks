@@ -1,35 +1,14 @@
 ﻿namespace TruckServices.Models
 {
     using System.Text.Json.Serialization;
-
-    public class NewPlacesResponse
+    public class TruckBusinessStatus
     {
-        [JsonPropertyName("places")]
-        public List<NewPlace> Places { get; set; }
-    }
-
-    public class NewPlace
-    {
-        [JsonPropertyName("displayName")]
-        public DisplayName DisplayName { get; set; }
-
-        [JsonPropertyName("businessStatus")]
-        public string BusinessStatus { get; set; }
-
-        [JsonPropertyName("openingHours")]
-        public OpeningHours OpeningHours { get; set; }
-    }
-
-    public class DisplayName
-    {
-        [JsonPropertyName("text")]
-        public string Text { get; set; }
-    }
-
-    public class OpeningHours
-    {
-        [JsonPropertyName("openNow")]
+        public bool Found { get; set; }
+        public string? Name { get; set; }
+        public string? Address { get; set; }
         public bool? OpenNow { get; set; }
+        public string? OpeningState { get; set; }
+        public string? HoursText { get; set; }
+        public string? Message { get; set; }
     }
-
 }

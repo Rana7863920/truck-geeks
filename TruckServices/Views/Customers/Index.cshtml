@@ -167,32 +167,56 @@
 
 @section Scripts {
     <script>
-        $(document).ready(function () {
-            // Create button
-            $('#btnCreate').click(function (e) {
+                $(function () {
+            // helper to load modal content and then show modal
+            function loadModal(url) {
+                // show a quick loading placeholder
+                $('#modalContent').html('<div class="text-center p-4">Loading...</div>');
+                // fetch content
+                $.get(url)
+                    .done(function (data) {
+                        $('#modalContent').html(data);
+                        $('#crudModal').modal('show');
+                    })
+                    .fail(function (xhr, status, err) {
+                        console.error('Modal load failed:', status, err);
+                        $('#modalContent').html(
+                            '<div class="p-4 text-center text-danger">Unable to load. Please try again.</div>'
+                        );
+                        $('#crudModal').modal('show');
+                    });
+            }
+
+               $('#btnCreate').click(function (e) {
+            e.preventDefault();
+            $.get('/Customers/Create', function (data) {
+                $('#modalContent').html(data);
+                $('#crudModal').modal('show');
+            });
+        });
+
+            // Edit (delegated) - works for buttons added later too
+            $(document).on('click', '.editBtn', function (e) {
                 e.preventDefault();
-                $('#crudModal').modal('show');
-                $.get('/Customers/Create', function (data) {
-                    $('#modalContent').html(data);
-                });
+                var id = $(this).data('id');
+                if (!id) return;
+                loadModal('/Customers/Edit/' + id);
             });
 
-            // Edit button
-            $('.editBtn').click(function () {
+            // Delete (delegated)
+            $(document).on('click', '.deleteBtn', function (e) {
+                e.preventDefault();
                 var id = $(this).data('id');
-                $('#crudModal').modal('show');
-                $.get('/Customers/Edit/' + id, function (data) {
-                    $('#modalContent').html(data);
-                });
+                if (!id) return;
+                loadModal('/Customers/Delete/' + id);
             });
 
-            // Delete button
-            $('.deleteBtn').click(function () {
-                var id = $(this).data('id');
-                $('#crudModal').modal('show');
-                $.get('/Customers/Delete/' + id, function (data) {
-                    $('#modalContent').html(data);
-                });
+            // Optional: clear modal content when modal hidden
+            $('#crudModal').on('hidden.bs.modal', function () {
+                // keep a tiny delay so if user re-opens quickly it looks snappy
+                setTimeout(function () {
+                    $('#modalContent').empty();
+                }, 200);
             });
         });
     </script>

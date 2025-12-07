@@ -34,7 +34,6 @@ namespace TruckServices.Controllers
 
             if (model.Email == storedEmail && model.Password == storedPassword)
             {
-                // ✅ Create claims
                 var claims = new List<Claim>
         {
             new Claim(ClaimTypes.Name, model.Email),
@@ -44,10 +43,15 @@ namespace TruckServices.Controllers
                 var claimsIdentity = new ClaimsIdentity(
                     claims, CookieAuthenticationDefaults.AuthenticationScheme);
 
-                // ✅ Sign in
                 await HttpContext.SignInAsync(
-                    CookieAuthenticationDefaults.AuthenticationScheme,
-                    new ClaimsPrincipal(claimsIdentity));
+      CookieAuthenticationDefaults.AuthenticationScheme,
+      new ClaimsPrincipal(claimsIdentity),
+      new AuthenticationProperties
+      {
+          IsPersistent = true,                     
+          ExpiresUtc = DateTime.UtcNow.AddDays(7)   
+      });
+
 
                 return RedirectToAction("Index", "Customers");
             }

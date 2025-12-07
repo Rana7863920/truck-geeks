@@ -5,6 +5,8 @@ using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
 using TruckServices.Data;
 using TruckServices.EmailSender;
+using TruckServices.Services;
+using TruckServices.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -25,14 +27,26 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddScoped<EmailSender>();
 builder.Services.Configure<EmailSettings>(
     builder.Configuration.GetSection("EmailSettings"));
+builder.Services.Configure<GeoapifySettings>(
+    builder.Configuration.GetSection("Geoapify"));
+
+builder.Services.AddTransient<GeoapifyService>();
 
 
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
     {
-        options.LoginPath = "/Account/Login"; // redirect if not logged in
+        options.LoginPath = "/Account/Login";
         options.LogoutPath = "/Account/Logout";
+
+        options.ExpireTimeSpan = TimeSpan.FromDays(7); 
+        options.SlidingExpiration = true;              
+
+        options.Cookie.HttpOnly = true;
+        options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+        options.Cookie.SameSite = SameSiteMode.Strict;
     });
+
 
 builder.Configuration
     .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)

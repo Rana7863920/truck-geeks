@@ -286,6 +286,12 @@
         height: 20px;
     }
 
+    .no-results {
+        border: 1px solid #e0e0e0;
+        background: #fafafa !important;
+    }
+
+
     /* On medium and larger screens */
     @@media (min-width: 768px) {
         .search-icon {
@@ -345,7 +351,7 @@
         <div class="row g-3 align-items-end">
 
             <!-- Location -->
-            <div class="col-12 col-md-5">
+            <div class="col-12 col-md-4">
                 <label for="location" class="form-label fw-semibold">Location</label>
                 <div class="input-group">
                     <span class="input-group-text bg-light">
@@ -371,7 +377,7 @@
             </div>
 
             <!-- Service -->
-            <div class="col-12 col-md-5">
+            <div class="col-12 col-md-4">
                 <label for="service" class="form-label fw-semibold">Service</label>
                 <div class="input-group">
                     <span class="input-group-text bg-light">
@@ -448,6 +454,12 @@
                 </div>
             </div>
 
+            <!-- Search Radius -->
+            <div class="col-12 col-md-2">
+                <label for="radius" class="form-label fw-semibold">Search Radius (km)</label>
+                <input type="number" class="form-control" id="radius" name="radius" min="1" max="100" value="50" required>
+            </div>
+
             <!-- Search Button -->
             <div class="col-12 col-md-2">
                 <label class="form-label invisible">Search</label>
@@ -459,6 +471,12 @@
         </div>
     </form>
 </div>
+
+@if (!string.IsNullOrEmpty(Model.ErrorMessage))
+{
+    <div class="alert alert-warning text-center mt-4">@Model.ErrorMessage</div>
+}
+
 <!-- Existing Results Container -->
 <div class="results-container">
     <h2>Service Providers (@Model.TotalCount)</h2>
@@ -501,6 +519,18 @@
             </div>
         </div>
     }
+
+    @if (Model.TotalCount == 0)
+    {
+        <div class="no-results text-center p-5 mt-4 mb-5 shadow-sm rounded-3 bg-light" data-aos="fade-up">
+            <h3 class="fw-bold mb-2">No Results Found</h3>
+            <p class="text-muted mb-3">
+                Try increasing the search radius or search for another nearby city.
+            </p>
+            <i class="fas fa-search fa-3x text-secondary opacity-50"></i>
+        </div>
+    }
+
 
     <!-- Pagination -->
     <div class="pagination-wrapper">

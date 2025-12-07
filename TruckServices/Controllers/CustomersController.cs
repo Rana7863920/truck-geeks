@@ -60,7 +60,7 @@ namespace TruckServices.Controllers
         // GET: Customers/Create
         public IActionResult Create()
         {
-            return PartialView("Partial/_CreateEditPartial", new CustomersData());
+            return PartialView("Partial/_CreatePartial", new CustomersData());
         }
 
         // POST: Customers/Create
@@ -93,7 +93,7 @@ namespace TruckServices.Controllers
             if (customer == null) return NotFound();
 
             // This passes the whole model to your partial view
-            return PartialView("Partial/_CreateEditPartial", customer);
+            return PartialView("Partial/_EditPartial", customer);
         }
 
 

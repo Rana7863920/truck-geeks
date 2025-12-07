@@ -367,7 +367,7 @@
                             <div class="row g-3 align-items-end">
 
                                 <!-- Location -->
-                                <div class="col-12 col-md-5">
+                                <div class="col-12 col-md-4">
                                     <label for="location" class="form-label fw-semibold">Location</label>
                                     <div class="input-group">
                                         <span class="input-group-text bg-light">
@@ -376,17 +376,14 @@
                                                 <circle cx="8" cy="6.667" r="2" />
                                             </svg>
                                         </span>
-
-                                        <!-- FIX: make it a <select> -->
                                         <select id="location" name="location" class="form-select" style="width: 100%;" required>
                                             <option value="">Search for a city</option>
                                         </select>
                                     </div>
                                 </div>
 
-
                                 <!-- Service -->
-                                <div class="col-12 col-md-5">
+                                <div class="col-12 col-md-4">
                                     <label for="service" class="form-label fw-semibold">Service</label>
                                     <div class="input-group">
                                         <span class="input-group-text bg-light">
@@ -397,8 +394,8 @@
                                         <select class="form-select" id="service" name="service" required>
                                             <option value="">Select the service</option>
                                             <option value="repair">Truck Repair</option>
-                                            <option value="repair">Trailer Repair</option>
-                                            <option value="repair">Tire Repair</option>
+                                            <option value="trailer_repair">Trailer Repair</option>
+                                            <option value="tire_repair">Tire Repair</option>
                                             <option value="towing">Towing</option>
                                             <option value="maintenance">Maintenance</option>
                                             <option value="trailer" class="extra-option d-none">Trailer</option>
@@ -409,15 +406,23 @@
                                     </div>
                                 </div>
 
+                                <!-- Search Radius -->
+                                <div class="col-12 col-md-2">
+                                    <label for="radius" class="form-label fw-semibold">Search Radius (km)</label>
+                                    <input type="number" class="form-control" id="radius" name="radius" min="1" max="100" value="50" required>
+                                </div>
+
                                 <!-- Search Button -->
                                 <div class="col-12 col-md-2">
                                     <label class="form-label invisible">Search</label>
-                                    <button type="submit" class="btn btn-primary w-100 d-flex align-items-center justify-content-center gap-2" style="padding-top:11px; padding-bottom:11px;">                                       
+                                    <button type="submit" class="btn btn-primary w-100 d-flex align-items-center justify-content-center gap-2" style="padding-top:11px; padding-bottom:11px;">
                                         Search
                                     </button>
                                 </div>
+
                             </div>
                         </form>
+
                     </div>
 
                 </div>
