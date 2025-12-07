@@ -9,7 +9,8 @@
 
         public string Location { get; set; }
         public string Service { get; set; }
-        public string ErrorMessage { get; set; } 
+        public string ErrorMessage { get; set; }
+        public int Radius { get; set; } = 50;
 
         public int TotalPages => (int)Math.Ceiling((double)TotalCount / PageSize);
     }

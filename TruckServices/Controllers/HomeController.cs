@@ -210,6 +210,7 @@ namespace TruckServices.Controllers
                     PageSize = pageSize,
                     Location = location,
                     Service = service,
+                    Radius = radius,
                     ErrorMessage = totalCount == 0 ? "No results found for your search." : ""
                 });
             }
@@ -225,6 +226,7 @@ namespace TruckServices.Controllers
                     CurrentPage = 1,
                     TotalCount = 0,
                     PageSize = 10,
+                    Radius = radius,
                     ErrorMessage = "Something went wrong. Please try again."
                 };
 
