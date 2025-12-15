@@ -1,4 +1,6 @@
-﻿namespace TruckServices.Data
+﻿using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
+
+namespace TruckServices.Data
 {
     public class CustomersData
     {
@@ -14,6 +16,8 @@
         public string? Source { get; set; }
         public byte[]? ImageUrl { get; set; }   
         public bool IsPaid { get; set; }
+        [ValidateNever]
+        public ICollection<CompanyService> CompanyServices { get; set; }
     }
 
 }

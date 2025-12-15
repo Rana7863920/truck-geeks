@@ -320,11 +320,6 @@
 
     /* Border OFF for large screens */
     @@media (min-width: 992px) {
-        #radius
-
-    {
-        border: none !important;
-    }
 
     }
 
@@ -428,9 +423,18 @@
 
                                 <!-- Search Radius -->
                                 <div class="col-12 col-md-2">
-                                    <label for="radius" class="form-label fw-semibold">Search Radius (km)</label>
-                                    <input type="number" class="form-control" id="radius" name="radius" min="1" max="100" value="50" required>
+                                    <label for="radius" class="form-label fw-semibold">
+                                        Search Radius (Miles)
+                                    </label>
+
+                                    <select class="form-select" id="radius" name="radius" required>
+                                        <option value="5">5 miles</option>
+                                        <option value="10" selected>10 miles</option>
+                                        <option value="25">25 miles</option>
+                                        <option value="50">50 miles</option>
+                                    </select>
                                 </div>
+
 
                                 <!-- Search Button -->
                                 <div class="col-12 col-md-2">

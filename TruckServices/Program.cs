@@ -27,11 +27,10 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddScoped<EmailSender>();
 builder.Services.Configure<EmailSettings>(
     builder.Configuration.GetSection("EmailSettings"));
-builder.Services.Configure<GeoapifySettings>(
-    builder.Configuration.GetSection("Geoapify"));
+builder.Services.Configure<GoogleMapsSettings>(
+    builder.Configuration.GetSection("GoogleMaps"));
 
-builder.Services.AddTransient<GeoapifyService>();
-
+builder.Services.AddHttpClient<GoogleMapsService>();
 
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>

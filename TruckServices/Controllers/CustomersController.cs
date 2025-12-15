@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using System;
 using TruckServices.Data;
+using TruckServices.Models.ViewModels;
 
 namespace TruckServices.Controllers
 {
@@ -58,91 +59,155 @@ namespace TruckServices.Controllers
         }
 
         // GET: Customers/Create
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
-            return PartialView("Partial/_CreatePartial", new CustomersData());
+            var vm = new CustomerServiceVM
+            {
+                Customer = new CustomersData(),
+                Services = await _context.Services
+            .Where(s => s.IsActive)
+            .Select(s => new ServiceCheckboxVM
+            {
+                ServiceId = s.Id,
+                Name = s.Name,
+                IsSelected = false
+            })
+            .ToListAsync()
+            };
+            return PartialView("Partial/_CreatePartial", vm);
         }
 
         // POST: Customers/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(CustomersData customer, IFormFile? image)
+        public async Task<IActionResult> Create(CustomerServiceVM vm, IFormFile? image)
         {
-            if (ModelState.IsValid)
-            {
-                if (image != null)
-                {
-                    using var ms = new MemoryStream();
-                    await image.CopyToAsync(ms);
-                    customer.ImageUrl = ms.ToArray();
-                }
+            if (!ModelState.IsValid)
+                return PartialView("Partial/_CreateCustomer", vm);
 
-                _context.Add(customer);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+            if (image != null)
+            {
+                using var ms = new MemoryStream();
+                await image.CopyToAsync(ms);
+                vm.Customer.ImageUrl = ms.ToArray();
             }
-            return View(customer);
+
+            _context.CustomersData.Add(vm.Customer);
+            await _context.SaveChangesAsync();
+
+            // 🔗 Save M-M relations
+            var selectedServices = vm.Services
+                .Where(x => x.IsSelected)
+                .Select(x => new CompanyService
+                {
+                    CompanyId = vm.Customer.Id,
+                    ServiceId = x.ServiceId
+                });
+
+            _context.CompanyServices.AddRange(selectedServices);
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction(nameof(Index));
         }
 
         // GET: Customers/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
-            if (id == null) return NotFound();
+            try
+            {
+                if (id == null) return NotFound();
 
-            var customer = await _context.CustomersData.FindAsync(id);
-            if (customer == null) return NotFound();
+                var customer = await _context.CustomersData
+    .Include(c => c.CompanyServices)
+    .FirstOrDefaultAsync(c => c.Id == id);
 
-            // This passes the whole model to your partial view
-            return PartialView("Partial/_EditPartial", customer);
+                var selectedServiceIds = customer.CompanyServices
+                    .Select(cs => cs.ServiceId)
+                    .ToHashSet();
+
+                var services = await _context.Services.ToListAsync();
+
+                var vm = new CustomerServiceVM
+                {
+                    Customer = customer,
+                    Services = services.Select(s => new ServiceCheckboxVM
+                    {
+                        ServiceId = s.Id,
+                        Name = s.Name,
+                        IsSelected = selectedServiceIds.Contains(s.Id)
+                    }).ToList()
+                };
+
+
+                // This passes the whole model to your partial view
+                return PartialView("Partial/_EditPartial", vm);
+            }
+            catch (Exception ex)
+            {
+
+                throw;
+            }
+            
         }
 
 
         // POST: Customers/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, CustomersData customer, IFormFile? image)
+        public async Task<IActionResult> Edit(int id, CustomerServiceVM vm, IFormFile? image)
         {
-            if (id != customer.Id) return NotFound();
+            if (id != vm.Customer.Id) return NotFound();
 
             if (ModelState.IsValid)
             {
                 try
                 {
-                    var existingCustomer = await _context.CustomersData.FindAsync(id);
-                    if (existingCustomer == null) return NotFound();
+                    var customer = await _context.CustomersData
+                        .Include(c => c.CompanyServices)
+                        .FirstOrDefaultAsync(c => c.Id == id);
 
-                    // Update only what’s editable
-                    existingCustomer.CompanyName = customer.CompanyName;
-                    existingCustomer.StreetAddress = customer.StreetAddress;
-                    existingCustomer.City = customer.City;
-                    existingCustomer.State = customer.State;
-                    existingCustomer.Country = customer.Country;
-                    existingCustomer.MobileNumber = customer.MobileNumber;
-                    existingCustomer.SecondMobileNumber = customer.SecondMobileNumber;
-                    existingCustomer.Email = customer.Email;
-                    existingCustomer.IsPaid = customer.IsPaid;
-                    // Skip Source (not editable)
+                    if (customer == null) return NotFound();
+
+                    // Update fields
+                    customer.CompanyName = vm.Customer.CompanyName;
+                    customer.StreetAddress = vm.Customer.StreetAddress;
+                    customer.City = vm.Customer.City;
+                    customer.State = vm.Customer.State;
+                    customer.Country = vm.Customer.Country;
+                    customer.MobileNumber = vm.Customer.MobileNumber;
+                    customer.SecondMobileNumber = vm.Customer.SecondMobileNumber;
+                    customer.Email = vm.Customer.Email;
+                    customer.IsPaid = vm.Customer.IsPaid;
 
                     if (image != null)
                     {
                         using var ms = new MemoryStream();
                         await image.CopyToAsync(ms);
-                        existingCustomer.ImageUrl = ms.ToArray();
+                        customer.ImageUrl = ms.ToArray();
                     }
 
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!_context.CustomersData.Any(e => e.Id == customer.Id))
-                        return NotFound();
-                    else
-                        throw;
-                }
-                return RedirectToAction(nameof(Index));
-            }
+                    // 🔄 Update services
+                    _context.CompanyServices.RemoveRange(customer.CompanyServices);
 
-            return PartialView("Partial/_CreateEditPartial", customer);
+                    var selectedServices = vm.Services
+                        .Where(x => x.IsSelected)
+                        .Select(x => new CompanyService
+                        {
+                            CompanyId = customer.Id,
+                            ServiceId = x.ServiceId
+                        });
+
+                    _context.CompanyServices.AddRange(selectedServices);
+
+                    await _context.SaveChangesAsync();
+                    return RedirectToAction(nameof(Index));
+                }
+                catch (Exception ex)
+                {
+                }
+             }
+
+            return PartialView("Partial/_CreateEditPartial", vm);
         }
 
         // GET: Customers/Delete/5

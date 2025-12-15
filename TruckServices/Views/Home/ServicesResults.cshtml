@@ -291,6 +291,18 @@
         background: #fafafa !important;
     }
 
+    .services-list {
+    margin: 6px 0 0;
+    padding-left: 18px;
+}
+
+.services-list li {
+    font-size: 14px;
+    color: #444;
+    margin-bottom: 4px;
+}
+
+
 
     /* On medium and larger screens */
     @@media (min-width: 768px) {
@@ -454,11 +466,24 @@
                 </div>
             </div>
 
-            <!-- Search Radius -->
             <div class="col-12 col-md-2">
-                <label for="radius" class="form-label fw-semibold">Search Radius (km)</label>
-                <input type="number" class="form-control" id="radius" name="radius" min="1" max="100" value=@Model.Radius required>
+                <label asp-for="Radius" class="form-label fw-semibold">
+                    Search Radius (Miles)
+                </label>
+
+                <select asp-for="Radius"
+                        class="form-select"
+                        asp-items="@(new SelectList(new[]
+            {
+                new { Value = 5, Text = "5 miles" },
+                new { Value = 10, Text = "10 miles" },
+                new { Value = 25, Text = "25 miles" },
+new { Value = 50, Text = "50 miles" }
+            }, "Value", "Text"))">
+                </select>
             </div>
+
+
 
             <!-- Search Button -->
             <div class="col-12 col-md-2">
@@ -515,6 +540,20 @@
                             </a>
                         </span>
                     </div>
+
+                    @if (provider.Services != null && provider.Services.Any())
+                    {
+                        <div class="provider-services mt-2">
+                            <strong>Services:</strong>
+                            <ul class="services-list">
+                                @foreach (var service in provider.Services)
+                                {
+                                    <li>@service</li>
+                                }
+                            </ul>
+                        </div>
+                    }
+
                 </div>
             </div>
         </div>

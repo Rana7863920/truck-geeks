@@ -285,6 +285,7 @@
                 @if (User.Identity?.IsAuthenticated ?? false)
                 {
                     <a asp-controller="Customers" asp-action="Index" class="header-link">Customer Management</a>
+                    <a asp-controller="Services" asp-action="Index" class="header-link">Services Management</a>
                     <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
                         @Html.AntiForgeryToken()
                         <button type="submit" class="header-link border-0 bg-transparent">Logout</button>

@@ -17,17 +17,15 @@ namespace TruckServices.Controllers
         private readonly ILogger<HomeController> _logger;
         private readonly ApplicationDbContext _context;
         private readonly EmailSender.EmailSender _emailSender;
-        private readonly IHttpClientFactory _httpClientFactory;
         private static readonly MemoryCache _cache = new MemoryCache(new MemoryCacheOptions());
-        private readonly GeoapifyService _geoapifyService;
+        private readonly GoogleMapsService _googleMapsService;
 
-        public HomeController(ILogger<HomeController> logger, ApplicationDbContext context, EmailSender.EmailSender emailSender, IHttpClientFactory httpClientFactory, GeoapifyService geoapifyService)
+        public HomeController(ILogger<HomeController> logger, ApplicationDbContext context, EmailSender.EmailSender emailSender, GoogleMapsService googleMapsService)
         {
             _context = context;
             _logger = logger;
             _emailSender = emailSender;
-            _httpClientFactory = httpClientFactory;
-            _geoapifyService = geoapifyService;
+            _googleMapsService = googleMapsService;
         }
 
         public async Task<IActionResult> Index()
@@ -38,62 +36,26 @@ namespace TruckServices.Controllers
         [HttpGet]
         public async Task<IActionResult> SearchCities(string term)
         {
-            if (string.IsNullOrWhiteSpace(term) || term.Length < 2)
+            if (string.IsNullOrWhiteSpace(term))
                 return Json(new List<object>());
 
-            if (_cache.TryGetValue(term.ToLower(), out List<object> cached))
+            string cacheKey = term.ToLower();
+            if (_cache.TryGetValue(cacheKey, out List<object> cached))
                 return Json(cached);
 
-            string apiUrl = $"https://geocoding-api.open-meteo.com/v1/search?name={term}&count=25&language=en&format=json";
+            var cities = await _googleMapsService.AutocompleteCitiesAsync(term);
 
-            try
+            var results = cities.Select(c => new
             {
-                var httpClient = _httpClientFactory.CreateClient();
-                httpClient.DefaultRequestHeaders.AcceptEncoding.Add(
-                    new System.Net.Http.Headers.StringWithQualityHeaderValue("gzip"));
+                City = c.City,
+                State = c.State,
+                Country = c.Country
+            }).ToList();
 
-                var response = await httpClient.GetAsync(apiUrl);
-                if (!response.IsSuccessStatusCode)
-                    return Json(new List<object>());
+            _cache.Set(cacheKey, results, TimeSpan.FromHours(6));
 
-                Stream contentStream = await response.Content.ReadAsStreamAsync();
-
-                // 🔧 Decompress manually if it's gzip
-                if (response.Content.Headers.ContentEncoding.Contains("gzip"))
-                    contentStream = new System.IO.Compression.GZipStream(contentStream, System.IO.Compression.CompressionMode.Decompress);
-
-                using var reader = new StreamReader(contentStream);
-                string jsonString = await reader.ReadToEndAsync();
-
-                var json = System.Text.Json.JsonDocument.Parse(jsonString).RootElement;
-                if (!json.TryGetProperty("results", out JsonElement results))
-                    return Json(new List<object>());
-
-                var allResults = results.EnumerateArray()
-                    .Where(x =>
-                        x.TryGetProperty("country_code", out var codeEl) &&
-                        (codeEl.GetString() == "US" || codeEl.GetString() == "CA"))
-                    .Select(x => new
-                    {
-                        City = x.GetProperty("name").GetString(),
-                        State = x.TryGetProperty("admin1", out var stateEl) ? stateEl.GetString() : "",
-                        Country = x.TryGetProperty("country", out var countryEl) ? countryEl.GetString() : "",
-                        CountryCode = x.GetProperty("country_code").GetString()
-                    })
-                    .Distinct()
-                    .OrderBy(x => x.City)
-                    .ToList();
-
-                _cache.Set(term.ToLower(), allResults, TimeSpan.FromHours(6));
-                return Json(allResults);
-            }
-            catch
-            {
-                return Json(new List<object>());
-            }
-
+            return Json(results);
         }
-
 
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -115,11 +77,14 @@ namespace TruckServices.Controllers
                                         .ToArray();
 
                     if (parts.Length > 0) city = parts[0];
-                    if (parts.Length > 1) state = parts[1];
-                    if (parts.Length > 2) country = parts[2];
+                    if (parts.Length > 1) state = LocationMapper.MapState(parts[1]);
+                    if (parts.Length > 2) country = LocationMapper.MapCountry(parts[2]);
                 }
 
-                var query = _context.CustomersData.AsQueryable();
+                var query = _context.CustomersData
+    .Include(c => c.CompanyServices)
+        .ThenInclude(cs => cs.Service)
+    .AsQueryable();
 
                 if (!string.IsNullOrEmpty(city))
                     query = query.Where(x => x.City != null && x.City.ToLower() == city.ToLower());
@@ -130,6 +95,9 @@ namespace TruckServices.Controllers
                 if (!string.IsNullOrEmpty(country))
                     query = query.Where(x => x.Country != null && x.Country.ToLower() == country.ToLower());
 
+                //if (serviceId.HasValue)
+                //    query = query.Where(x => x.CompanyServices.Any(cs => cs.ServiceId == serviceId));
+
                 int totalCount = await query.CountAsync();
 
                 // ---------------------------------------------------------------
@@ -139,36 +107,44 @@ namespace TruckServices.Controllers
                 {
                     try
                     {
-                        var nearest = await _geoapifyService.GetNearestDifferentCityAsync(location, radius);
+                        var nearestCities =
+                            await _googleMapsService.GetNearestCitiesAsync(location, radius);
 
-                        if (nearest != null)
+                        foreach (var (nCity, nState, nCountry) in nearestCities)
                         {
-                            string nearestCity = nearest.Value.city;
-                            string nearestState = nearest.Value.state;
-                            string nearestCountry = nearest.Value.country;
+                            var tempQuery = _context.CustomersData.AsQueryable();
 
-                            if (!string.IsNullOrEmpty(country) &&
-                                nearestCountry?.Equals(country, StringComparison.OrdinalIgnoreCase) == true)
+                            tempQuery = tempQuery.Where(x =>
+                                x.City != null &&
+                                x.City.ToLower() == nCity.ToLower());
+
+                            if (!string.IsNullOrEmpty(nCountry))
                             {
-                                query = _context.CustomersData.Where(
-                                    x => x.City != null && x.City.ToLower() == nearestCity.ToLower() &&
-                                         x.Country != null && x.Country.ToLower() == nearestCountry.ToLower());
+                                tempQuery = tempQuery.Where(x =>
+                                    x.Country != null &&
+                                    x.Country.ToLower() == nCountry.ToLower());
+                            }
 
-                                if (!string.IsNullOrEmpty(state) && !string.IsNullOrEmpty(nearestState))
-                                {
-                                    query = query.Where(x =>
-                                        x.State != null &&
-                                        x.State.ToLower() == nearestState.ToLower());
-                                }
+                            if (!string.IsNullOrEmpty(nState))
+                            {
+                                tempQuery = tempQuery.Where(x =>
+                                    x.State != null &&
+                                    x.State.ToLower() == nState.ToLower());
+                            }
 
-                                totalCount = await query.CountAsync();
+                            var count = await tempQuery.CountAsync();
+
+                            if (count > 0)
+                            {
+                                query = tempQuery;
+                                totalCount = count;
+                                break; 
                             }
                         }
                     }
                     catch (Exception ex)
                     {
-                        // Log only, do NOT show technical details to user
-                        _logger.LogError(ex, "Geoapify API failed.");
+                        _logger.LogError(ex, "Google Maps nearest city lookup failed.");
                     }
                 }
 
@@ -197,7 +173,11 @@ namespace TruckServices.Controllers
                     ImageBase64 = p.ImageUrl != null
                         ? $"data:{GetImageMimeType(p.ImageUrl)};base64,{Convert.ToBase64String(p.ImageUrl)}"
                         : "https://www.gynprog.com.br/wp-content/uploads/2017/06/wood-blog-placeholder.jpg",
-                    Status = "Open"
+                    Status = await _googleMapsService.GetBusinessStatusByNameAsync(p.CompanyName, p.City, p.State, p.Country),
+                    Services = p.CompanyServices
+    .Where(cs => cs.Service.IsActive)
+    .Select(cs => cs.Service.Name)
+    .ToList(),
                 }).ToList();
 
                 var mappedList = (await Task.WhenAll(tasks)).ToList();

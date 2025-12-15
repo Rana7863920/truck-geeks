@@ -20,6 +20,8 @@
         public double Longitude { get; set; }
         public double Distance { get; set; }
         public string Status { get; set; }
+
+        public List<string> Services { get; set; } = new List<string>();
     }
 
 }
