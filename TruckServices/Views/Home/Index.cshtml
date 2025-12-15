@@ -701,9 +701,27 @@
                             const lat = position.coords.latitude;
                             const lon = position.coords.longitude;
 
-                            // Dummy: map coordinates to New York
-                            $('#location').val('new-york').trigger('change');
-                            alert("Location detected: New York (dummy)");
+                             $.ajax({
+                        url: '@Url.Action("GetCityStateCountry", "Home")', // point to your HomeController
+                        method: 'GET',
+                        data: { lat: lat, lng: lon },
+                        success: function(result) {
+                            if(result) {
+                               text = `${result.city}, ${result.state}, ${result.country}`;
+                                
+                                // Remove the "Use My Location" option
+                                $('#location').find('option[value="use-my-location"]').remove();
+
+                                // Add new option with resolved location and select it
+                                const newOption = new Option(text, text, true, true);
+                                $('#location').append(newOption).trigger('change');
+
+                            }
+                        },
+                        error: function() {
+                            alert("Failed to get city from coordinates.");
+                        }
+                    });
                         }, function () {
                             alert("Could not detect location.");
                         });
@@ -784,15 +802,34 @@
                 }
             });
 
-            // Handle when "Use My Location" is selected
-            $('#location').on('select2:select', function (e) {
-                if (e.params.data.id === "use-my-location") {
-                    console.log("User chose their location!");
-                    // 👉 trigger geolocation logic here if needed
+                   $('#location').on('select2:select', function (e) {
+            if (e.params.data.id === "use-my-location") {
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(
+                        function (position) {
+                            const lat = position.coords.latitude;
+                            const lng = position.coords.longitude;
+                            console.log("Latitude:", lat, "Longitude:", lng);
+
+                            // Call your backend or API to reverse geocode
+                            getCityStateCountry(lat, lng);
+                        },
+                        function (error) {
+                            console.error("Geolocation error:", error);
+                            alert("Could not get your location. Please allow location access.");
+                        }
+                    );
+                } else {
+                    alert("Geolocation is not supported by your browser.");
                 }
-            });
+            }
         });
 
+
+                
+
+        });
+           
 
     </script>
 

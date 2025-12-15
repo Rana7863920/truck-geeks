@@ -174,6 +174,35 @@ namespace TruckServices.Services
             return results;
         }
 
+        public async Task<(string city, string state, string country)?> ReverseGeocode(double lat, double lng)
+        {
+            string url = $"https://maps.googleapis.com/maps/api/geocode/json?latlng={lat},{lng}&key={_apiKey}";
+            var response = await _http.GetAsync(url);
+            if (!response.IsSuccessStatusCode) return null;
+
+            var json = await response.Content.ReadAsStringAsync();
+            var doc = JsonDocument.Parse(json);
+
+            var results = doc.RootElement.GetProperty("results");
+            if (results.GetArrayLength() == 0) return null;
+
+            string city = null, state = null, country = null;
+
+            foreach (var comp in results[0].GetProperty("address_components").EnumerateArray())
+            {
+                var types = comp.GetProperty("types").EnumerateArray().Select(t => t.GetString());
+                if (types.Contains("locality")) city = comp.GetProperty("long_name").GetString();
+                if (types.Contains("administrative_area_level_1")) state = comp.GetProperty("long_name").GetString();
+                if (types.Contains("country")) country = comp.GetProperty("long_name").GetString();
+            }
+
+            if (city != null && state != null && country != null)
+                return (city, state, country);
+
+            return null;
+        }
+
+
 
         // 3️⃣ Reverse geocode → state & country
         private async Task<(string city, string state, string country)?>

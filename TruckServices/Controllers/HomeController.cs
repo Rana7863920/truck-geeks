@@ -267,6 +267,15 @@ namespace TruckServices.Controllers
             }
         }
 
+
+        [HttpGet]
+        public async Task<IActionResult> GetCityStateCountry(double lat, double lng)
+        {
+            var result = await _googleMapsService.ReverseGeocode(lat, lng);
+            if (result == null) return NotFound();
+            return Json(new { city = result.Value.city, state = result.Value.state, country = result.Value.country });
+        }
+
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
         {
