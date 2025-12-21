@@ -170,6 +170,7 @@ namespace TruckServices.Controllers
                     SecondMobileNumber = p.SecondMobileNumber,
                     Email = p.Email,
                     Source = p.Source,
+                    IsPaid = p.IsPaid,
                     ImageBase64 = p.ImageUrl != null
                         ? $"data:{GetImageMimeType(p.ImageUrl)};base64,{Convert.ToBase64String(p.ImageUrl)}"
                         : "https://www.gynprog.com.br/wp-content/uploads/2017/06/wood-blog-placeholder.jpg",

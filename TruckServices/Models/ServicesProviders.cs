@@ -14,6 +14,7 @@
         public string Email { get; set; }
         public string Source { get; set; }
         public string ImageBase64 { get; set; }
+        public bool IsPaid { get; set; }
 
         // App-only
         public double Latitude { get; set; }

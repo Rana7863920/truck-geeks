@@ -2,6 +2,14 @@
 
 @{
     ViewData["Title"] = "Service Results";
+
+    var featuredProviders = Model.Providers?
+       .Where(p => p.IsPaid && !string.IsNullOrEmpty(p.ImageBase64))
+       .ToList();
+
+    var regularProviders = Model.Providers?
+        .Where(p => !p.IsPaid || string.IsNullOrEmpty(p.ImageBase64))
+        .ToList();
 }
 
 <style>
@@ -66,15 +74,27 @@
     }
 
     .provider-image {
-        flex: 0 0 30%;
+        flex: 0 0 100%;
+        max-width: 300px;
+    }
+
+    .provider-image-regular {
+        flex: 0 0 100%;
         max-width: 300px;
     }
 
         .provider-image img {
-            width: 100%;
+            width: 106%;
             height: auto;
             border-radius: 6px;
         }
+
+    .provider-image-regular img {
+        width: 30%;
+        height: auto;
+        border-radius: 6px;
+    }
+
 
     .provider-info {
         flex: 1;
@@ -191,6 +211,7 @@
         align-items: stretch;
         flex-direction: row;
         width: 100%;
+        height: 3rem;
     }
 
 
@@ -302,7 +323,125 @@
             margin-bottom: 4px;
         }
 
+    /* Dropdown container */
+    .location-dropdown {
+        position: absolute;
+        top: calc(100% + 6px);
+        left: 0;
+        right: 0;
+        background-color: #ffffff;
+        border: 1px solid #e5e7eb;
+        border-radius: 10px;
+        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12);
+        z-index: 1050;
+        max-height: 280px;
+        overflow-y: auto;
+        padding: 6px 0;
+    }
 
+    /* Individual item */
+    .location-item {
+        padding: 10px 14px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        color: #1f2937; /* 🔴 FIX white text */
+        font-size: 14px;
+        line-height: 1.4;
+    }
+
+        /* Hover state */
+        .location-item:hover {
+            background-color: #f3f4f6;
+        }
+
+    /* Icon circle */
+    .location-icon {
+        width: 34px;
+        height: 34px;
+        min-width: 34px;
+        border-radius: 50%;
+        background: #eef2ff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 16px;
+        color: #4f46e5;
+    }
+
+    /* Use My Location special style */
+    .location-item.location-primary .location-icon {
+        background: #e0f2fe;
+        color: #0284c7;
+    }
+
+    .location-item.location-primary strong {
+        font-weight: 600;
+    }
+
+    /* Divider */
+    .location-divider {
+        border-top: 1px solid #e5e7eb;
+        margin: 6px 0;
+    }
+
+    /* Scrollbar (optional but premium feel) */
+    .location-dropdown::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .location-dropdown::-webkit-scrollbar-thumb {
+        background: #d1d5db;
+        border-radius: 4px;
+    }
+
+    /* Active search border */
+    .location-searching {
+        border-color: #4f46e5 !important;
+        box-shadow: 0 0 0 0.15rem rgba(79, 70, 229, 0.25);
+    }
+
+    /* Smooth transition */
+    #location {
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        border: 0.5px solid #e9ecef !important;
+    }
+
+    .typing-dots {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+        .typing-dots span {
+            width: 6px;
+            height: 6px;
+            background-color: #4f46e5;
+            border-radius: 50%;
+            display: inline-block;
+            animation: dotPulse 1.4s infinite ease-in-out both;
+        }
+
+            .typing-dots span:nth-child(1) {
+                animation-delay: -0.32s;
+            }
+
+            .typing-dots span:nth-child(2) {
+                animation-delay: -0.16s;
+            }
+
+    @@keyframes dotPulse {
+        0%, 80%, 100% {
+            transform: scale(0.6);
+            opacity: 0.4;
+        }
+
+        40% {
+            transform: scale(1);
+            opacity: 1;
+        }
+    }
 
     /* On medium and larger screens */
     @@media (min-width: 768px) {
@@ -318,6 +457,37 @@
             width: 28px;
             height: 28px;
         }
+    }
+
+    @@media (min-width: 768px){
+        .provider-body {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+
+        .provider-image {
+            flex: 0 0 30% !important;
+            max-width: 300px;
+        }
+
+            .provider-image img {
+                width: 100%;
+                height: auto;
+                border-radius: 6px;
+            }
+
+        .provider-image-regular {
+            flex: 0 0 30% !important;
+            max-width: 300px;
+        }
+
+            .provider-image-regular img {
+                width: 30%;
+                height: auto;
+                border-radius: 6px;
+            }
     }
 </style>
 
@@ -363,29 +533,41 @@
         <div class="row g-3 align-items-end">
 
             <!-- Location -->
-            <div class="col-12 col-md-4">
+            <div class="col-12 col-md-4 position-relative">
                 <label for="location" class="form-label fw-semibold">Location</label>
+
                 <div class="input-group">
                     <span class="input-group-text bg-light">
-                        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 16 16">
+                        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5"
+                             viewBox="0 0 16 16">
                             <path d="M14 6.667C14 11.334 8 15.334 8 15.334S2 11.334 2 6.667a6 6 0 0112 0z" />
                             <circle cx="8" cy="6.667" r="2" />
                         </svg>
                     </span>
 
-                    <!-- FIX: make it a <select> -->
-                    <select id="location" name="location" class="form-select" style="width: 100%;" required>
-                        <option value="">Search for a city</option>
+                    <input type="text"
+                           id="location"
+                           name="location"
+                           class="form-control"
+                           placeholder="Search for a city"
+                           autocomplete="off"
+                           required
+                           value="@Model.Location">
 
+                    <!-- Loading spinner -->
+                    <span class="input-group-text bg-white d-none" id="locationLoader">
+                        <div class="typing-dots">
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                        </div>
 
-                        @* Preselect the existing city from the model *@
-                        @if (!string.IsNullOrEmpty(Model.Location))
-                        {
-                            <option value="@Model.Location" selected>@Model.Location</option>
-                        }
-
-                    </select>
+                    </span>
                 </div>
+
+
+                <!-- Custom Dropdown -->
+                <div id="locationDropdown" class="location-dropdown d-none"></div>
             </div>
 
             <!-- Service -->
@@ -506,59 +688,136 @@ new { Value = 50, Text = "50 miles" }
 <div class="results-container">
     <h2>Service Providers (@Model.TotalCount)</h2>
 
-    @foreach (var provider in Model.Providers)
+    @if (featuredProviders != null && featuredProviders.Any())
     {
-        <div class="provider-card">
-            <div class="provider-header">
-                <h3>@provider.CompanyName</h3>
-                <button type="button" class="contact-button"
-                        data-bs-toggle="modal"
-                        data-bs-target="#contactModal"
-                        data-company="@provider.CompanyName"
-                        data-number="@provider.MobileNumber"
-                        data-second="@provider.SecondMobileNumber">
-                    Contact
-                </button>
-            </div>
-            <div class="provider-body">
-                <div class="provider-image">
-                    <img src="@provider.ImageBase64" alt="@provider.CompanyName logo" />
+        <h2 class="mb-4">
+            ⭐ Featured Service Providers
+        </h2>
+
+        @foreach (var provider in featuredProviders)
+        {
+            <div class="provider-card border border-warning">
+                <div class="provider-header">
+                    <h3>
+                        @provider.CompanyName
+                        <span class="badge bg-warning text-dark ms-2">Featured</span>
+                    </h3>
+
+                    <button type="button" class="contact-button"
+                            data-bs-toggle="modal"
+                            data-bs-target="#contactModal"
+                            data-company="@provider.CompanyName"
+                            data-number="@provider.MobileNumber"
+                            data-second="@provider.SecondMobileNumber">
+                        Contact
+                    </button>
                 </div>
-                <div class="provider-info">
-                    <div class="info-tags">
-                        <span><i class="fas fa-map-marker-alt"></i>@provider.StreetAddress</span>
-                        <span>
-                            <i class="far fa-clock"></i>Hours:
-                            <span class="@(provider.Status == "Open" ? "open" : "closed")">(@provider.Status)</span>
-                        </span>
-                        <span>
-                            <i class="fas fa-external-link-alt"></i>
-                            <a href="https://www.google.com/search?q=@Uri.EscapeDataString(provider.CompanyName + " " + provider.StreetAddress)"
-                               target="_blank"
-                               rel="noopener noreferrer">
-                                Website
-                            </a>
-                        </span>
+
+                <div class="provider-body">
+                    <div class="provider-image">
+                        <img src="@provider.ImageBase64"
+                             alt="@provider.CompanyName logo" />
                     </div>
 
-                    @if (provider.Services != null && provider.Services.Any())
-                    {
-                        <div class="provider-services mt-2">
+                    <div class="provider-info">
+                        <div class="info-tags">
+                            <span><i class="fas fa-map-marker-alt"></i>@provider.StreetAddress</span>
+                            <span>
+                                <i class="far fa-clock"></i>
+                                <span class="@(provider.Status == "Open" ? "open" : "closed")">
+                                    (@provider.Status)
+                                </span>
+                            </span>
+                            <span>
+                                <i class="fas fa-external-link-alt"></i>
+                                <a href="https://www.google.com/search?q=@Uri.EscapeDataString(provider.CompanyName + " " + provider.StreetAddress)"
+                                   target="_blank"
+                                   rel="noopener noreferrer">
+                                    Website
+                                </a>
+                            </span>
+                        </div>
+
+                        @if (provider.Services?.Any() == true)
+                        {
                             <strong>Services:</strong>
                             <ul class="services-list">
-                                @foreach (var service in provider.Services)
+                                @foreach (var s in provider.Services)
                                 {
-                                    <li>@service</li>
+                                    <li>@s</li>
                                 }
                             </ul>
-                        </div>
-                    }
-
+                        }
+                    </div>
                 </div>
             </div>
-        </div>
+        }
+
+        <hr class="my-5" />
     }
 
+
+    @if (regularProviders != null && regularProviders.Any())
+    {
+        <h2>Other Service Providers (@regularProviders.Count)</h2>
+
+        @foreach (var provider in regularProviders)
+        {
+            <div class="provider-card">
+                <div class="provider-header">
+                    <h3>@provider.CompanyName</h3>
+                    <button type="button" class="contact-button"
+                            data-bs-toggle="modal"
+                            data-bs-target="#contactModal"
+                            data-company="@provider.CompanyName"
+                            data-number="@provider.MobileNumber"
+                            data-second="@provider.SecondMobileNumber">
+                        Contact
+                    </button>
+                </div>
+                <div class="provider-body">
+                    <div class="provider-image-regular">
+                        <img src="@provider.ImageBase64" alt="@provider.CompanyName logo" />
+                    </div>
+                    <div class="provider-info">
+                        <div class="info-tags">
+                            <span><i class="fas fa-map-marker-alt"></i>@provider.StreetAddress</span>
+                            <span>
+                                <i class="far fa-clock"></i>Hours:
+                                <span class="@(provider.Status == "Open" ? "open" : "closed")">(@provider.Status)</span>
+                            </span>
+                            <span>
+                                <i class="fas fa-external-link-alt"></i>
+                                <a href="https://www.google.com/search?q=@Uri.EscapeDataString(provider.CompanyName + " " + provider.StreetAddress)"
+                                   target="_blank"
+                                   rel="noopener noreferrer">
+                                    Website
+                                </a>
+                            </span>
+                        </div>
+
+                        @if (provider.Services != null && provider.Services.Any())
+                        {
+                            <div class="provider-services mt-2">
+                                <strong>Services:</strong>
+                                <ul class="services-list">
+                                    @foreach (var service in provider.Services)
+                                    {
+                                        <li>@service</li>
+                                    }
+                                </ul>
+                            </div>
+                        }
+
+                    </div>
+                </div>
+            </div>
+        }
+
+    }
+
+
+   
     @if (Model.TotalCount == 0)
     {
         <div class="no-results text-center p-5 mt-4 mb-5 shadow-sm rounded-3 bg-light" data-aos="fade-up">
@@ -601,96 +860,123 @@ new { Value = 50, Text = "50 miles" }
 
 @section Scripts {
     <script>
-        $(document).ready(function () {
-            console.log("✅ Service Results page script loaded.");
+        const input = document.getElementById("location");
+        const dropdown = document.getElementById("locationDropdown");
+        let debounce;
 
-            // Initialize Select2 on the location dropdown
-            $('#location').select2({
-                placeholder: "Search for a city",
-                width: '100%',
-                minimumInputLength: 0,
-                ajax: {
-                    url: '/Home/SearchCities',
-                    dataType: 'json',
-                    delay: 250,
-                    data: function (params) {
-                        return { term: params.term || "" };
-                    },
-                    processResults: function (data) {
-                        var results = [{
-                            id: "use-my-location",
-                            text: "📍 Use My Location"
-                        }];
-
-                        data.forEach(function (cityObj) {
-                            let label = `${cityObj.city}${cityObj.state ? ', ' + cityObj.state : ''}, ${cityObj.country}`;
-                            results.push({ id: label, text: label });
-                        });
-
-                        return { results: results };
-                    }
-                }
-            });
-
-            // Handle “Use My Location”
-            $('#location').on('select2:select', function (e) {
-                if (e.params.data.id === "use-my-location") {
-                    if (navigator.geolocation) {
-                        navigator.geolocation.getCurrentPosition(function (position) {
-                            const lat = position.coords.latitude;
-                            const lon = position.coords.longitude;
-                            alert(`Location detected: (${lat}, ${lon})`);
-                        }, function () {
-                            alert("Could not detect location.");
-                        });
-                    } else {
-                        alert("Geolocation not supported.");
-                    }
-                }
-            });
-
-            // Contact modal logic
-            const contactModal = document.getElementById('contactModal');
-            contactModal.addEventListener('show.bs.modal', function (event) {
-                const button = event.relatedTarget;
-                const company = button.getAttribute('data-company');
-                const number = button.getAttribute('data-number');
-                const second = button.getAttribute('data-second');
-
-                let infoText = "";
-                if (number || second) {
-                    infoText = `<strong>${company}</strong><br>`;
-                    if (number) infoText += `Primary: <a href="tel:${number}">${number}</a><br>`;
-                    if (second) infoText += `Secondary: <a href="tel:${second}">${second}</a>`;
-                } else {
-                    infoText = "Sorry, no contact info available.";
-                }
-
-                document.getElementById('contactInfo').innerHTML = infoText;
-            });
+        input.addEventListener("focus", () => {
+            renderUseMyLocation();
+            dropdown.classList.remove("d-none");
         });
-    </script>
 
+               input.addEventListener("input", () => {
+            clearTimeout(debounce);
+            const term = input.value.trim();
 
-    <script>
-        const contactModal = document.getElementById('contactModal');
-        contactModal.addEventListener('show.bs.modal', function (event) {
-            const button = event.relatedTarget;
-            const company = button.getAttribute('data-company');
-            const number = button.getAttribute('data-number');
-            const second = button.getAttribute('data-second');
-
-            let infoText = "";
-            if (number || second) {
-                infoText = `<strong>${company}</strong><br>`;
-                if (number) infoText += `Primary: <a href="tel:${number}">${number}</a><br>`;
-                if (second) infoText += `Secondary: <a href="tel:${second}">${second}</a>`;
-            } else {
-                infoText = "Sorry, no contact info available.";
+            if (!term) {
+                hideLoader();
+                dropdown.classList.add("d-none");
+                return;
             }
 
-            document.getElementById('contactInfo').innerHTML = infoText;
+            showLoader();
+
+            debounce = setTimeout(() => {
+                fetch(`/Home/SearchCities?term=${encodeURIComponent(term)}`)
+                    .then(r => r.json())
+                    .then(data => {
+                        hideLoader();
+                        renderCities(data);
+                    })
+                    .catch(() => {
+                        hideLoader();
+                    });
+            }, 300);
         });
+
+
+        document.addEventListener("click", e => {
+            if (!e.target.closest(".position-relative")) {
+                dropdown.classList.add("d-none");
+            }
+        });
+
+               function renderUseMyLocation() {
+            dropdown.innerHTML = `
+                <div class="location-item location-primary" onclick="useMyLocation()">
+                    <div class="location-icon">📍</div>
+                    <div>
+                        <strong>Use My Location</strong><br>
+                        <small class="text-muted">Detect your current city</small>
+                    </div>
+                </div>
+                <div class="location-divider"></div>
+            `;
+        }
+
+        function renderCities(data) {
+            renderUseMyLocation();
+
+            if (!data.length) {
+                dropdown.innerHTML += `
+                    <div class="location-item text-muted">
+                        No cities found
+                    </div>
+                `;
+                return;
+            }
+
+            data.forEach(c => {
+                const label =
+                    `${c.city}${c.state ? ', ' + c.state : ''}, ${c.country}`;
+
+                dropdown.innerHTML += `
+                    <div class="location-item" onclick="selectCity('${label.replace(/'/g, "\\'")}')">
+                        <div class="location-icon">🏙️</div>
+                        <div>${label}</div>
+                    </div>
+                `;
+            });
+
+            dropdown.classList.remove("d-none");
+        }
+
+                function selectCity(text) {
+            input.value = text;
+            hideLoader();
+            dropdown.classList.add("d-none");
+        }
+
+        function useMyLocation() {
+            showLoader();
+            navigator.geolocation.getCurrentPosition(pos => {
+                fetch(`/Home/GetCityStateCountry?lat=${pos.coords.latitude}&lng=${pos.coords.longitude}`)
+                    .then(r => r.json())
+                    .then(r => {
+                        input.value = `${r.city}, ${r.state}, ${r.country}`;
+                        hideLoader();
+                        dropdown.classList.add("d-none");
+                    });
+            }, () => {
+                hideLoader();
+                alert("Could not access your location.");
+            });
+        }
+
+    </script>
+
+    <script>
+        const loader = document.getElementById("locationLoader");
+
+        function showLoader() {
+            loader.classList.remove("d-none");
+            input.classList.add("location-searching");
+        }
+
+        function hideLoader() {
+            loader.classList.add("d-none");
+            input.classList.remove("location-searching");
+        }
     </script>
 }
 

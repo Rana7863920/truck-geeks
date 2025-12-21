@@ -265,6 +265,29 @@
             align-items: center;
         }
 
+        .header {
+            height: 80px;
+            padding: 0;
+        }
+
+        .logo-image {
+            height: 100px !important;
+            width: auto !important;
+            max-height: none !important;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            height: 100%;
+        }
+
+        .logo-footer{
+            font-size: 1.5rem;
+            line-height: 1;
+            display: flex;
+            align-items: center;
+        }
     </style>
 
 </head>
@@ -274,7 +297,7 @@
 
             <a asp-area="" asp-controller="Home" asp-action="Index"
                class="logo d-flex align-items-center text-decoration-none">
-                <img src="assets/img/logo.png" class="img-fluid me-2 logo-image" alt="">
+                <img src="assets/img/main-logo-removebg-preview.png" class="me-2 logo-image" alt="">
                 <h1 class="sitename mb-0">Truck Geeks</h1>
             </a>
 
@@ -337,8 +360,9 @@
         <div class="container footer-top">
             <div class="row gy-4">
                 <div class="col-lg-5 col-md-12 footer-about">
-                    <a href="index.html" class="logo d-flex align-items-center">
-                        <span class="sitename">Truck Geeks</span>
+                    <a asp-area="" asp-controller="Home" asp-action="Index"
+                       class="d-flex align-items-center text-decoration-none">
+                        <h1 class="sitename mb-3">Truck Geeks</h1>
                     </a>
                     <p>
                         Find trusted truck repair shops near you — fast, reliable, and verified.
