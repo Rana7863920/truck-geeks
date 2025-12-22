@@ -59,7 +59,37 @@ namespace TruckServices.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> ServicesResults(string location, string service, int page = 1, int radius = 50)
+        public IActionResult ServicesResults(string location, string service, int page = 1, int radius = 50)
+        {
+            return RedirectToAction(
+                nameof(ServicesResult),
+                new
+                {
+                    location,
+                    service,
+                    page,
+                    radius
+                });
+        }
+
+
+        [HttpGet]
+        public async Task<IActionResult> ServicesResult(
+    string location,
+    string service,
+    int page = 1,
+    int radius = 50)
+        {
+            return await BuildServicesResults(location, service, page, radius);
+        }
+
+
+
+        private async Task<IActionResult> BuildServicesResults(
+    string location,
+    string service,
+    int page,
+    int radius)
         {
             try
             {
@@ -138,7 +168,7 @@ namespace TruckServices.Controllers
                             {
                                 query = tempQuery;
                                 totalCount = count;
-                                break; 
+                                break;
                             }
                         }
                     }
@@ -214,7 +244,6 @@ namespace TruckServices.Controllers
                 return View(vm);
             }
         }
-
 
 
         public IActionResult Privacy()

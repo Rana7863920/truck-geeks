@@ -709,26 +709,9 @@
 
                                         </span>
                                     </div>
-
-
                                     <!-- Custom Dropdown -->
                                     <div id="locationDropdown" class="location-dropdown d-none"></div>
                                 </div>
-
-                              @*   <div class="col-12 col-md-4">
-                                    <label for="location" class="form-label fw-semibold">Location</label>
-                                    <div class="input-group">
-                                        <span class="input-group-text bg-light">
-                                            <svg width="18" height="18" fill="none" stroke="currentcolor" stroke-width="1.5" viewbox="0 0 16 16">
-                                                <path d="m14 6.667c14 11.334 8 15.334 8 15.334s2 11.334 2 6.667a6 6 0 0112 0z" />
-                                                <circle cx="8" cy="6.667" r="2" />
-                                            </svg>
-                                        </span>
-                                        <select id="location" name="location" class="form-select" style="width: 100%;" required>
-                                            <option value="">search for a city</option>
-                                        </select>
-                                    </div>
-                                </div> *@
 
                                 <!-- Service -->
                                 <div class="col-12 col-md-4">
@@ -779,16 +762,8 @@
 
                             </div>
                         </form>
-
                     </div>
-
                 </div>
-
-
-
-@*                 <div class="col-lg-5 order-1 order-lg-2 hero-img" data-aos="zoom-out">
-                    <img src="assets/img/logo.png" class="img-fluid mb-3 mb-lg-0" alt="" style="z-index:0">
-                </div> *@
             </div>
 
         </div>
@@ -1018,57 +993,6 @@
 
 </main>
 @section Scripts {
-@*     <script>
-        $(document).ready(function () {
-            // Initialize Select2 on city dropdown
-            $('.select2-city').select2({
-                placeholder: "Where do you need service?",
-                allowClear: true,
-                    width: '100%',
-                dropdownCssClass: 'form-select',   // Style the dropdown
-                selectionCssClass: 'form-select'   // Style the input box
-            });
-
-            // Detect 'Use My Location' option
-            $('#location').on('change', function () {
-                if ($(this).val() === 'use-my-location') {
-                    if (navigator.geolocation) {
-                        navigator.geolocation.getCurrentPosition(function (position) {
-                            const lat = position.coords.latitude;
-                            const lon = position.coords.longitude;
-
-                             $.ajax({
-                        url: '@Url.Action("GetCityStateCountry", "Home")', // point to your HomeController
-                        method: 'GET',
-                        data: { lat: lat, lng: lon },
-                        success: function(result) {
-                            if(result) {
-                               text = `${result.city}, ${result.state}, ${result.country}`;
-
-                                // Remove the "Use My Location" option
-                                $('#location').find('option[value="use-my-location"]').remove();
-
-                                // Add new option with resolved location and select it
-                                const newOption = new Option(text, text, true, true);
-                                $('#location').append(newOption).trigger('change');
-
-                            }
-                        },
-                        error: function() {
-                            alert("Failed to get city from coordinates.");
-                        }
-                    });
-                        }, function () {
-                            alert("Could not detect location.");
-                        });
-                    } else {
-                        alert("Geolocation not supported.");
-                    }
-                }
-            });
-        });
-        </script>*@
-
     <script>
         document.querySelectorAll('.quick-service-btn').forEach(function (btn) {
             btn.addEventListener('click', function () {
