@@ -74,22 +74,14 @@ namespace TruckServices.Controllers
 
 
         [HttpGet]
-        public async Task<IActionResult> ServicesResult(
-    string location,
-    string service,
-    int page = 1,
-    int radius = 50)
+        public async Task<IActionResult> ServicesResult(string location, string service, int page = 1, int radius = 50)
         {
             return await BuildServicesResults(location, service, page, radius);
         }
 
 
 
-        private async Task<IActionResult> BuildServicesResults(
-    string location,
-    string service,
-    int page,
-    int radius)
+        private async Task<IActionResult> BuildServicesResults(string location, string service, int page, int radius)
         {
             try
             {
@@ -112,9 +104,9 @@ namespace TruckServices.Controllers
                 }
 
                 var query = _context.CustomersData
-    .Include(c => c.CompanyServices)
-        .ThenInclude(cs => cs.Service)
-    .AsQueryable();
+                            .Include(c => c.CompanyServices)
+                                .ThenInclude(cs => cs.Service)
+                            .AsQueryable();
 
                 if (!string.IsNullOrEmpty(city))
                     query = query.Where(x => x.City != null && x.City.ToLower() == city.ToLower());
@@ -140,20 +132,19 @@ namespace TruckServices.Controllers
                         var nearestCities =
                             await _googleMapsService.GetNearestCitiesAsync(location, radius);
 
+                        IQueryable<CustomersData> combinedQuery =
+                            _context.CustomersData.Where(x => false); // empty base
+
                         foreach (var (nCity, nState, nCountry) in nearestCities)
                         {
+                            if (string.IsNullOrEmpty(nCity))
+                                continue;
+
                             var tempQuery = _context.CustomersData.AsQueryable();
 
                             tempQuery = tempQuery.Where(x =>
                                 x.City != null &&
                                 x.City.ToLower() == nCity.ToLower());
-
-                            if (!string.IsNullOrEmpty(nCountry))
-                            {
-                                tempQuery = tempQuery.Where(x =>
-                                    x.Country != null &&
-                                    x.Country.ToLower() == nCountry.ToLower());
-                            }
 
                             if (!string.IsNullOrEmpty(nState))
                             {
@@ -162,14 +153,23 @@ namespace TruckServices.Controllers
                                     x.State.ToLower() == nState.ToLower());
                             }
 
-                            var count = await tempQuery.CountAsync();
-
-                            if (count > 0)
+                            if (!string.IsNullOrEmpty(nCountry))
                             {
-                                query = tempQuery;
-                                totalCount = count;
-                                break;
+                                tempQuery = tempQuery.Where(x =>
+                                    x.Country != null &&
+                                    x.Country.ToLower() == nCountry.ToLower());
                             }
+
+                            combinedQuery = combinedQuery.Union(tempQuery);
+                        }
+
+                        totalCount = await combinedQuery.CountAsync();
+
+                        if (totalCount > 0)
+                        {
+                            query = combinedQuery
+                                .Include(c => c.CompanyServices)
+                                    .ThenInclude(cs => cs.Service);
                         }
                     }
                     catch (Exception ex)
@@ -177,6 +177,7 @@ namespace TruckServices.Controllers
                         _logger.LogError(ex, "Google Maps nearest city lookup failed.");
                     }
                 }
+
 
                 // -----------------------------
                 // Fetch providers
@@ -206,9 +207,9 @@ namespace TruckServices.Controllers
                         : "https://www.gynprog.com.br/wp-content/uploads/2017/06/wood-blog-placeholder.jpg",
                     Status = await _googleMapsService.GetBusinessStatusByNameAsync(p.CompanyName, p.City, p.State, p.Country),
                     Services = p.CompanyServices
-    .Where(cs => cs.Service.IsActive)
-    .Select(cs => cs.Service.Name)
-    .ToList(),
+                    .Where(cs => cs.Service.IsActive)
+                    .Select(cs => cs.Service.Name)
+                    .ToList(),
                 }).ToList();
 
                 var mappedList = (await Task.WhenAll(tasks)).ToList();
@@ -222,7 +223,7 @@ namespace TruckServices.Controllers
                     Location = location,
                     Service = service,
                     Radius = radius,
-                    ErrorMessage = totalCount == 0 ? "No results found for your search." : ""
+                    ErrorMessage = totalCount == 0 ? "No services found in this area.\r\nTry increasing the search radius or searching a nearby city." : ""
                 });
             }
             catch (Exception ex)

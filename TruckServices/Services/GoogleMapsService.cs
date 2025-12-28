@@ -107,8 +107,7 @@ namespace TruckServices.Services
                     loc.GetProperty("lng").GetDouble());
         }
 
-        public async Task<List<(string city, string state, string country)>>
-    GetNearestCitiesAsync(string location, int radiusKm = 50)
+        public async Task<List<(string city, string state, string country)>> GetNearestCitiesAsync(string location, int radiusKm = 50)
         {
             var coords = await GeocodeAsync(location);
             if (coords == null) return new();
@@ -298,7 +297,7 @@ namespace TruckServices.Services
         public async Task<string> GetBusinessStatusByNameAsync(string name, string city, string state, string country)
         {
             string? placeId = await GetPlaceIdAsync(name, city, state, country);
-            if (placeId == null) return "Unknown";
+            if (placeId == null) return "Closed";
 
             return await GetBusinessStatusAsync(placeId); 
         }
