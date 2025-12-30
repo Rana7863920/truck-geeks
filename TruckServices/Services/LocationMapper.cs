@@ -31,18 +31,94 @@
         { "NU", "Nunavut" }, { "YT", "Yukon" }
     };
 
-        private static readonly Dictionary<string, string> CountryMap = new()
-    {
-        { "USA", "United States" },
-        { "US", "United States" },
-        { "CA", "Canada" }
-    };
+        private static readonly Dictionary<string, HashSet<string>> StateCanonicalToVariants =
+    StateMap
+        .SelectMany(kvp => new[]
+        {
+            new { Canonical = kvp.Value, Variant = kvp.Key },
+            new { Canonical = kvp.Value, Variant = kvp.Value }
+        })
+        .GroupBy(x => x.Canonical, StringComparer.OrdinalIgnoreCase)
+        .ToDictionary(
+            g => g.Key,
+            g => g.Select(x => x.Variant)
+                  .ToHashSet(StringComparer.OrdinalIgnoreCase),
+            StringComparer.OrdinalIgnoreCase
+        );
+
+
+        public static string MapStateToCanonical(string input)
+        {
+            if (string.IsNullOrWhiteSpace(input))
+                return null;
+
+            return StateMap.TryGetValue(input.Trim(), out var full)
+                ? full
+                : input.Trim();
+        }
+
+        public static IReadOnlyCollection<string> GetStateVariants(string input)
+        {
+            if (string.IsNullOrWhiteSpace(input))
+                return Array.Empty<string>();
+
+            var canonical = MapStateToCanonical(input);
+
+            return StateCanonicalToVariants.TryGetValue(canonical, out var variants)
+                ? variants
+                : new[] { input.Trim() };
+        }
+
+
+        private static readonly Dictionary<string, string> CountryToCanonical =
+     new(StringComparer.OrdinalIgnoreCase)
+ {
+    { "US", "United States" },
+    { "USA", "United States" },
+    { "UNITED STATES", "United States" },
+
+    { "CA", "Canada" },
+    { "CANADA", "Canada" }
+ };
+
+        private static readonly Dictionary<string, HashSet<string>> CanonicalToAllVariants =
+    CountryToCanonical
+        .GroupBy(kvp => kvp.Value, StringComparer.OrdinalIgnoreCase)
+        .ToDictionary(
+            g => g.Key,
+            g => g.Select(x => x.Key)
+                  .Append(g.Key) // include canonical itself
+                  .ToHashSet(StringComparer.OrdinalIgnoreCase),
+            StringComparer.OrdinalIgnoreCase
+        );
+
+
 
         public static string MapState(string stateAbbrev) =>
             StateMap.TryGetValue(stateAbbrev.ToUpper(), out var full) ? full : stateAbbrev;
 
-        public static string MapCountry(string countryAbbrev) =>
-            CountryMap.TryGetValue(countryAbbrev.ToUpper(), out var full) ? full : countryAbbrev;
+        public static string MapCountryToCanonical(string input)
+        {
+            if (string.IsNullOrWhiteSpace(input))
+                return null;
+
+            return CountryToCanonical.TryGetValue(input.Trim(), out var canonical)
+                ? canonical
+                : input.Trim();
+        }
+
+        public static IReadOnlyCollection<string> GetCountryVariants(string input)
+        {
+            if (string.IsNullOrWhiteSpace(input))
+                return Array.Empty<string>();
+
+            var canonical = MapCountryToCanonical(input);
+
+            return CanonicalToAllVariants.TryGetValue(canonical, out var variants)
+                ? variants
+                : new[] { input.Trim() };
+        }
+
     }
 
 }

@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
+using Microsoft.IdentityModel.Tokens;
 using TruckServices.Data;
 using TruckServices.Models;
 using TruckServices.Services;
@@ -90,7 +91,9 @@ namespace TruckServices.Controllers
                 // -----------------------------
                 // Parse location (city, state, country)
                 // -----------------------------
-                string city = null, state = null, country = null;
+                string city = null;
+                IReadOnlyCollection<string> stateVariants = null;
+                IReadOnlyCollection<string> countryVariants = null;
 
                 if (!string.IsNullOrWhiteSpace(location))
                 {
@@ -98,45 +101,69 @@ namespace TruckServices.Controllers
                                         .Select(p => p.Trim())
                                         .ToArray();
 
-                    if (parts.Length > 0) city = parts[0];
-                    if (parts.Length > 1) state = LocationMapper.MapState(parts[1]);
-                    if (parts.Length > 2) country = LocationMapper.MapCountry(parts[2]);
+                    if (parts.Length > 0)
+                        city = parts[0];
+
+                    if (parts.Length > 1)
+                        stateVariants = LocationMapper.GetStateVariants(parts[1]);
+
+                    if (parts.Length > 2)
+                        countryVariants = LocationMapper.GetCountryVariants(parts[2]);
                 }
 
-                var query = _context.CustomersData
-                            .Include(c => c.CompanyServices)
-                                .ThenInclude(cs => cs.Service)
-                            .AsQueryable();
+
+                var query = _context.CustomersData.AsQueryable();
+
 
                 if (!string.IsNullOrEmpty(city))
                     query = query.Where(x => x.City != null && x.City.ToLower() == city.ToLower());
 
-                if (!string.IsNullOrEmpty(state))
-                    query = query.Where(x => x.State != null && x.State.ToLower() == state.ToLower());
+                if (stateVariants?.Count() > 0)
+                    query = query.Where(x => x.State != null && stateVariants.Contains(x.State));
 
-                if (!string.IsNullOrEmpty(country))
-                    query = query.Where(x => x.Country != null && x.Country.ToLower() == country.ToLower());
+                if (countryVariants?.Count() > 0)
+                    query = query.Where(x => x.Country != null && countryVariants.Contains(x.Country));
 
                 //if (serviceId.HasValue)
                 //    query = query.Where(x => x.CompanyServices.Any(cs => cs.ServiceId == serviceId));
 
-                int totalCount = await query.CountAsync();
-
                 // ---------------------------------------------------------------
                 // If no direct match → try nearest city with Geoapify service
                 // ---------------------------------------------------------------
-                if (totalCount == 0 && !string.IsNullOrEmpty(location))
+                IQueryable<CustomersData> finalQuery = query;
+
+                if (!string.IsNullOrEmpty(location))
                 {
                     try
                     {
                         var nearestCities =
                             await _googleMapsService.GetNearestCitiesAsync(location, radius);
 
-                        IQueryable<CustomersData> combinedQuery =
-                            _context.CustomersData.Where(x => false); // empty base
+                        IQueryable<CustomersData> nearestQuery =
+                            _context.CustomersData.Where(x => false);
 
                         foreach (var (nCity, nState, nCountry) in nearestCities)
                         {
+                            string tempCity = null;
+                            IReadOnlyCollection<string> tempStateVariants = null;
+                            IReadOnlyCollection<string> tempCountryVariants = null;
+
+                            if (!string.IsNullOrWhiteSpace(location))
+                            {
+                                var parts = location.Split(',', StringSplitOptions.RemoveEmptyEntries)
+                                                    .Select(p => p.Trim())
+                                                    .ToArray();
+
+                                if (parts.Length > 0)
+                                    tempCity = parts[0];
+
+                                if (parts.Length > 1)
+                                    tempStateVariants = LocationMapper.GetStateVariants(parts[1]);
+
+                                if (parts.Length > 2)
+                                    tempCountryVariants = LocationMapper.GetCountryVariants(parts[2]);
+                            }
+
                             if (string.IsNullOrEmpty(nCity))
                                 continue;
 
@@ -146,31 +173,23 @@ namespace TruckServices.Controllers
                                 x.City != null &&
                                 x.City.ToLower() == nCity.ToLower());
 
-                            if (!string.IsNullOrEmpty(nState))
+                            if (tempStateVariants?.Count() > 0)
                             {
                                 tempQuery = tempQuery.Where(x =>
-                                    x.State != null &&
-                                    x.State.ToLower() == nState.ToLower());
+                                    x.State != null && stateVariants.Contains(x.State));
                             }
 
-                            if (!string.IsNullOrEmpty(nCountry))
+                            if (tempCountryVariants?.Count() > 0)
                             {
                                 tempQuery = tempQuery.Where(x =>
-                                    x.Country != null &&
-                                    x.Country.ToLower() == nCountry.ToLower());
+                                    x.Country != null && countryVariants.Contains(x.Country));
                             }
 
-                            combinedQuery = combinedQuery.Union(tempQuery);
+                            nearestQuery = nearestQuery.Union(tempQuery);
                         }
 
-                        totalCount = await combinedQuery.CountAsync();
-
-                        if (totalCount > 0)
-                        {
-                            query = combinedQuery
-                                .Include(c => c.CompanyServices)
-                                    .ThenInclude(cs => cs.Service);
-                        }
+                        // Combine direct city + nearest cities
+                        finalQuery = finalQuery.Union(nearestQuery);
                     }
                     catch (Exception ex)
                     {
@@ -178,11 +197,14 @@ namespace TruckServices.Controllers
                     }
                 }
 
+                finalQuery = finalQuery.Include(c => c.CompanyServices).ThenInclude(cs => cs.Service);
+
+                int totalCount = await finalQuery.CountAsync();
 
                 // -----------------------------
                 // Fetch providers
                 // -----------------------------
-                var list = await query
+                var list = await finalQuery
                     .OrderByDescending(x => x.IsPaid)
                     .ThenBy(x => EF.Functions.Random())
                     .Skip((page - 1) * pageSize)
