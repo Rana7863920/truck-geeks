@@ -1,0 +1,279 @@
+﻿@using TruckServices.Data
+@model List<Service>
+
+    <style>
+    /* -----------------------------
+       ADMIN PAGE WRAPPER
+    ----------------------------- */
+
+    .admin-page {
+        padding-top: 80px; /* for fixed navbar */
+        padding-bottom: 40px;
+    }
+
+    .admin-container {
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+    /* -----------------------------
+       SERVICES TABLE
+    ----------------------------- */
+
+    .services-card {
+        min-height: 420px; /* prevents collapse when no data */
+    }
+
+    .services-table {
+        min-width: 100%;
+    }
+
+    /* Empty state */
+    .services-empty {
+        height: 260px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #6c757d;
+        font-size: 15px;
+    }
+
+    /* -----------------------------
+       BUTTON FIX
+    ----------------------------- */
+
+    .add-service-btn {
+        white-space: nowrap;
+    }
+
+    /* -----------------------------
+       MODAL FORM SPACING
+    ----------------------------- */
+
+    .modal-body .form-control {
+        height: 44px;
+    }
+
+    /* -----------------------------
+       RESPONSIVE
+    ----------------------------- */
+
+    @@media (max-width: 768px) {
+        .admin-container
+
+    {
+        padding: 0 15px;
+    }
+
+    }
+</style>
+
+<div class="admin-page">
+    <div class="admin-container">
+
+        <!-- Header -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h4 class="fw-bold mb-0">
+                <i class="fas fa-tools text-primary me-2"></i>
+                Manage Services
+            </h4>
+
+            <button class="btn btn-primary add-service-btn"
+                    data-bs-toggle="modal"
+                    data-bs-target="#createModal">
+                <i class="fas fa-plus me-1"></i> Add Service
+            </button>
+        </div>
+
+        <!-- Card -->
+        <div class="card shadow-sm border-0 services-card">
+            <div class="card-body p-0">
+
+                <table class="table table-hover align-middle mb-0 services-table">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Service</th>
+                            <th>Slug</th>
+                            <th>Status</th>
+                            <th class="text-end" style="width:160px;">Actions</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        @if (!Model.Any())
+                        {
+                            <tr>
+                                <td colspan="3">
+                                    <div class="services-empty">
+                                        No services created yet
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                        else
+                        {
+                            @foreach (var s in Model)
+                            {
+                                <tr>
+                                    <td class="fw-semibold">@s.Name</td>
+                                    <td class="text-muted">@s.Slug</td>
+                                    <td>
+                                        <span class="badge @(s.IsActive ? "bg-success" : "bg-secondary")">
+                                            @(s.IsActive ? "Active" : "Inactive")
+                                        </span>
+                                    </td>
+                                    <td class="text-end">
+                                        <button class="btn btn-sm btn-outline-warning editBtn"
+                                                data-id="@s.Id"
+                                                data-name="@s.Name"
+                                                data-active="@s.IsActive">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-danger deleteBtn"
+                                                data-id="@s.Id">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+
+                </table>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<div class="modal fade" id="createModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title">
+                    <i class="fas fa-plus-circle me-2"></i>Add Service
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+                <div class="mb-3">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Service Name</label>
+                        <input id="createName"
+                               class="form-control"
+                               placeholder="e.g. Car Repair"
+                               oninput="previewSlug(this.value)" />
+                        <small class="text-muted">
+                            Slug: <span id="slugPreview"></span>
+                        </small>
+                    </div>
+
+                </div>
+
+                <div class="form-check">
+                    <input id="createActive" type="checkbox" class="form-check-input" checked />
+                    <label class="form-check-label">Active</label>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+                <button class="btn btn-success" onclick="createService()">
+                    <i class="fas fa-save me-1"></i> Save
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="modal fade" id="editModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-warning">
+                <h5 class="modal-title">
+                    <i class="fas fa-edit me-2"></i>Edit Service
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+                <input type="hidden" id="editId" />
+
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Service Name</label>
+                    <input id="editName" class="form-control" />
+                </div>
+
+                <div class="form-check">
+                    <input id="editActive" type="checkbox" class="form-check-input" />
+                    <label class="form-check-label">Active</label>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+                <button class="btn btn-success" onclick="updateService()">
+                    <i class="fas fa-save me-1"></i> Update
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section Scripts{
+    <script>
+        function createService() {
+            fetch('/Services/Create', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    name: document.getElementById('createName').value,
+                    isActive: document.getElementById('createActive').checked
+                })
+            }).then(() => location.reload());
+        }
+
+        document.querySelectorAll('.editBtn').forEach(btn => {
+            btn.onclick = () => {
+                document.getElementById('editId').value = btn.dataset.id;
+                document.getElementById('editName').value = btn.dataset.name;
+                document.getElementById('editActive').checked = btn.dataset.active === "True";
+                new bootstrap.Modal(document.getElementById('editModal')).show();
+            };
+        });
+
+        function updateService() {
+            fetch('/Services/Update', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    id: document.getElementById('editId').value,
+                    name: document.getElementById('editName').value,
+                    isActive: document.getElementById('editActive').checked
+                })
+            }).then(() => location.reload());
+        }
+
+        document.querySelectorAll('.deleteBtn').forEach(btn => {
+            btn.onclick = () => {
+                if (!confirm("Delete this service?")) return;
+                fetch('/Services/Delete?id=' + btn.dataset.id, { method: 'POST' })
+                    .then(() => location.reload());
+            };
+        });
+
+                function previewSlug(text) {
+            document.getElementById('slugPreview').innerText =
+                text.toLowerCase()
+                    .replace(/[^a-z0-9\s]/g, '')
+                    .trim()
+                    .replace(/\s+/g, '-');
+        }
+    </script>
+
+}

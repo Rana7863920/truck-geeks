@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!-- https://go.microsoft.com/fwlink/?LinkID=208121. -->
+<Project>
+  <PropertyGroup>
+    <TimeStampOfAssociatedLegacyPublishXmlFile />
+    <History>True|2025-09-21T08:34:54.9803146Z||;True|2025-09-21T09:29:30.1712616+01:00||;False|2025-09-21T09:23:58.5000356+01:00||;</History>
+    <LastFailureDetails />
+    <_PublishTargetUrl>C:\Users\ACER\Downloads\Build</_PublishTargetUrl>
+  </PropertyGroup>
+  <ItemGroup>
+    <DestinationConnectionStrings Include="DefaultConnection">
+      <Value>Server=tcp:breakdownmechanicstest.database.windows.net,1433%3bInitial Catalog=BreakdownMechanics%3bPersist Security Info=False%3bUser ID=sqladminuser%3bPassword=Admin%40123#%3bMultipleActiveResultSets=False%3bEncrypt=True%3bTrustServerCertificate=False%3bConnection Timeout=30%3b</Value>
+    </DestinationConnectionStrings>
+  </ItemGroup>
+</Project>
