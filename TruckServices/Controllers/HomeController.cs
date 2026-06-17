@@ -226,7 +226,7 @@ namespace TruckServices.Controllers
                     IsPaid = p.IsPaid,
                     ImageBase64 = p.ImageUrl != null
                         ? $"data:{GetImageMimeType(p.ImageUrl)};base64,{Convert.ToBase64String(p.ImageUrl)}"
-                        : "https://www.gynprog.com.br/wp-content/uploads/2017/06/wood-blog-placeholder.jpg",
+                        : "https://img.magnific.com/premium-psd/truck-advertisement-billboard-mockup_669302-516.jpg?semt=ais_hybrid&w=740&q=80",
                     Status = await _googleMapsService.GetBusinessStatusByNameAsync(p.CompanyName, p.City, p.State, p.Country),
                     Services = p.CompanyServices
                     .Where(cs => cs.Service.IsActive)
