@@ -978,6 +978,27 @@ new { Value = 50, Text = "50 miles" }
             input.classList.remove("location-searching");
         }
     </script>
+
+    <script>
+        document.getElementById('contactModal')
+            .addEventListener('show.bs.modal', function (event) {
+
+            const button = event.relatedTarget;
+
+            const company = button.getAttribute('data-company');
+            const number = button.getAttribute('data-number');
+            const second = button.getAttribute('data-second');
+
+            document.getElementById('contactModalLabel').innerText =
+                company + ' Contact Info';
+
+            document.getElementById('contactInfo').innerHTML =
+                `
+                <strong>Phone:</strong> ${number || 'Not Available'}
+                ${second ? `<br><strong>Alt Phone:</strong> ${second}` : ''}
+                `;
+        });
+    </script>
 }
 
 
